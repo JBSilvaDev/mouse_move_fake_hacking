@@ -1,6 +1,9 @@
 import time
 import random
 import threading
+import os
+import socket
+import winsound
 import pyautogui
 import tkinter as tk
 from pynput import mouse, keyboard
@@ -9,9 +12,15 @@ import pystray
 from PIL import Image, ImageDraw
 
 # ================= CONFIGURAÇÕES =================
-TEMPO_OCIOSO_ALVO = 100      # 1 minuto sem mexer para ativar a pegadinha
-INTERVALO_MOVER_MOUSE = 90  # Intervalo para mover o mouse (Anti-Teams)
+TEMPO_OCIOSO_ALVO = 60      # 1 minuto sem mexer para ativar a pegadinha
+INTERVALO_MOVER_MOUSE = 45  # Intervalo para mover o mouse (Anti-Teams)
+MAX_POPUPS = 7              # Limite máximo de janelas de erro na tela
+TEMPO_CONTADOR_SEG = 180    # 3 minutos de contagem regressiva
 # ==================================================
+
+# Identificação do Sistema da Vítima
+NOME_USUARIO = os.getlogin().upper()
+NOME_PC = socket.gethostname().upper()
 
 ultimo_movimento = time.time()
 ultimo_movimento_mouse = time.time()
@@ -24,10 +33,13 @@ loop_texto_id = None
 progresso_atual = 0
 loop_barra_id = None
 loop_popups_id = None
+loop_timer_id = None
 estado_piscar = False
 tray_icon = None
+tempo_restante_contador = TEMPO_CONTADOR_SEG
 
 COMANDOS_HACKER = [
+    f"[!] ALVO IDENTIFICADO: HOST='{NOME_PC}' | USER='{NOME_USUARIO}'",
     "[+] INICIALIZANDO KERNEL EXPLOIT (CVE-2026-9981)...",
     "[+] CONECTANDO AO SERVIDOR REMOTO (IP: 185.220.101.5:666)...",
     "[!] BYPASSING FIREWALL CORPORATIVO E VPN...",
@@ -74,7 +86,7 @@ listener_mouse.start()
 listener_teclado.start()
 
 def fechar_todas_as_telas():
-    global janelas_hacker, janelas_popups, loop_texto_id, loop_barra_id, loop_popups_id
+    global janelas_hacker, janelas_popups, loop_texto_id, loop_barra_id, loop_popups_id, loop_timer_id
     if loop_texto_id:
         root.after_cancel(loop_texto_id)
         loop_texto_id = None
@@ -84,6 +96,9 @@ def fechar_todas_as_telas():
     if loop_popups_id:
         root.after_cancel(loop_popups_id)
         loop_popups_id = None
+    if loop_timer_id:
+        root.after_cancel(loop_timer_id)
+        loop_timer_id = None
 
     for jp in janelas_popups:
         try:
@@ -121,10 +136,17 @@ def verificar_sistema():
     root.after(500, verificar_sistema)
 
 def criar_janelas_hacker():
-    global janelas_hacker, texto_atual_idx, progresso_atual
+    global janelas_hacker, texto_atual_idx, progresso_atual, tempo_restante_contador
     texto_atual_idx = 0
     progresso_atual = 0
+    tempo_restante_contador = TEMPO_CONTADOR_SEG
     janelas_hacker.clear()
+
+    # Toca o som de alerta inicial
+    try:
+        winsound.MessageBeep(winsound.MB_ICONHAND)
+    except:
+        pass
 
     for m in get_monitors():
         j = tk.Toplevel(root)
@@ -144,9 +166,9 @@ def criar_janelas_hacker():
 
     global frame_titulo
     frame_titulo = tk.Frame(frame_centro, bg="black")
-    frame_titulo.pack(pady=(0, 15))
+    frame_titulo.pack(pady=(0, 10))
 
-    tk.Label(frame_titulo, text="⚠️ ", fg="#ffcc00", bg="black", font=("Consolas", 24, "bold")).pack(side=tk.LEFT)
+    tk.Label(frame_titulo, text="⚠️ ", fg="#ffcc00", bg="black", font=("Consolas", 22, "bold")).pack(side=tk.LEFT)
     
     global lbl_titulo
     lbl_titulo = tk.Label(
@@ -154,20 +176,31 @@ def criar_janelas_hacker():
         text="FALHA DE SEGURANÇA: SISTEMA COMPROMETIDO", 
         fg="#ff0033", 
         bg="black", 
-        font=("Consolas", 24, "bold")
+        font=("Consolas", 22, "bold")
     )
     lbl_titulo.pack(side=tk.LEFT)
 
-    tk.Label(frame_titulo, text=" ⚠️", fg="#ffcc00", bg="black", font=("Consolas", 24, "bold")).pack(side=tk.LEFT)
+    tk.Label(frame_titulo, text=" ⚠️", fg="#ffcc00", bg="black", font=("Consolas", 22, "bold")).pack(side=tk.LEFT)
 
     lbl_sub = tk.Label(
         frame_centro,
         text="[STATUS: INVASÃO REMOTA EM ANDAMENTO - NÃO DESLIGUE O PC]",
         fg="#ff5555",
         bg="black",
+        font=("Consolas", 12, "bold")
+    )
+    lbl_sub.pack(pady=(0, 10))
+
+    # Timer Regressivo Ransomware
+    global lbl_timer
+    lbl_timer = tk.Label(
+        frame_centro,
+        text="TEMPO RESTANTE PARA BLOQUEIO DEFINITIVO: 03:00",
+        fg="#ff0033",
+        bg="black",
         font=("Consolas", 13, "bold")
     )
-    lbl_sub.pack(pady=(0, 20))
+    lbl_timer.pack(pady=(0, 15))
 
     global lbl_terminal
     lbl_terminal = tk.Label(
@@ -175,10 +208,10 @@ def criar_janelas_hacker():
         text="", 
         fg="#00ff41", 
         bg="black", 
-        font=("Consolas", 13),
+        font=("Consolas", 11),
         justify="left"
     )
-    lbl_terminal.pack(pady=(0, 20))
+    lbl_terminal.pack(pady=(0, 15))
 
     global lbl_barra
     lbl_barra = tk.Label(
@@ -186,13 +219,28 @@ def criar_janelas_hacker():
         text="[░░░░░░░░░░░░░░░░░░░░] 0%",
         fg="#00ff41",
         bg="black",
-        font=("Consolas", 15, "bold")
+        font=("Consolas", 14, "bold")
     )
     lbl_barra.pack()
 
     animar_texto()
     animar_barra()
+    atualizar_timer()
     disparar_popups_falsos()
+
+def atualizar_timer():
+    global tempo_restante_contador, loop_timer_id, janelas_hacker
+    if not janelas_hacker:
+        return
+
+    if tempo_restante_contador > 0:
+        minutos = tempo_restante_contador // 60
+        segundos = tempo_restante_contador % 60
+        lbl_timer.config(text=f"TEMPO RESTANTE PARA BLOQUEIO DEFINITIVO: {minutos:02d}:{segundos:02d}")
+        tempo_restante_contador -= 1
+        loop_timer_id = root.after(1000, atualizar_timer)
+    else:
+        lbl_timer.config(text="TEMPO ESGOTADO - SISTEMA CRIPTOGRAFADO!")
 
 def animar_texto():
     global texto_atual_idx, loop_texto_id, janelas_hacker
@@ -203,7 +251,7 @@ def animar_texto():
         texto_atual = "\n".join(COMANDOS_HACKER[:texto_atual_idx + 1])
         lbl_terminal.config(text=texto_atual)
         texto_atual_idx += 1
-        loop_texto_id = root.after(700, animar_texto)
+        loop_texto_id = root.after(650, animar_texto)
 
 def animar_barra():
     global progresso_atual, loop_barra_id, janelas_hacker
@@ -233,10 +281,10 @@ def disparar_popups_falsos():
         return
 
     mensagens_erro = [
-        ("Erro crítico de Kernel", "Falha de proteção de memória em 0x00007FF7. Despejo de memória iniciado."),
-        ("Aviso de Segurança", "Tentativa de acesso não autorizado à webcam bloqueada parcialmente."),
-        ("Windows Defender", "Múltiplos arquivos compactados e enviados para IP externo."),
-        ("Atenção", "Seu IP foi registrado e reportado ao administrador de rede.")
+        ("Erro crítico de Kernel", f"Falha de proteção em 0x00007FF7 no processo '{NOME_PC}'. Despejo iniciado."),
+        ("Aviso de Segurança", "Tentativa de acesso não autorizado à webcam e microfone confirmada."),
+        ("Windows Defender", f"Múltiplos arquivos do usuário '{NOME_USUARIO}' enviados para IP externo."),
+        ("Atenção Alerta", "Sua chave de recuperação BitLocker foi alterada remotamente.")
     ]
     
     titulo, texto = random.choice(mensagens_erro)
@@ -246,9 +294,25 @@ def disparar_popups_falsos():
         popup.overrideredirect(True)
         popup.attributes('-topmost', True)
         
-        monitor_primario = get_monitors()[0]
-        px = random.randint(monitor_primario.x + 100, monitor_primario.x + monitor_primario.width - 500)
-        py = random.randint(monitor_primario.y + 100, monitor_primario.y + monitor_primario.height - 300)
+        monitor = get_monitors()[0]
+        
+        # POLÍTICA DE EXCLUSÃO CENTRAL:
+        # Gera o popup apenas nas 4 bordas periféricas, mantendo o centro limpo!
+        zona = random.choice(["top", "bottom", "left", "right"])
+        
+        if zona == "top":
+            px = random.randint(monitor.x + 50, monitor.x + monitor.width - 450)
+            py = random.randint(monitor.y + 30, monitor.y + int(monitor.height * 0.20))
+        elif zona == "bottom":
+            px = random.randint(monitor.x + 50, monitor.x + monitor.width - 450)
+            py = random.randint(monitor.y + int(monitor.height * 0.75), monitor.y + monitor.height - 180)
+        elif zona == "left":
+            px = random.randint(monitor.x + 30, monitor.x + int(monitor.width * 0.20))
+            py = random.randint(monitor.y + 50, monitor.y + monitor.height - 180)
+        else: # right
+            px = random.randint(monitor.x + int(monitor.width * 0.75), monitor.x + monitor.width - 450)
+            py = random.randint(monitor.y + 50, monitor.y + monitor.height - 180)
+
         popup.geometry(f"400x150+{px}+{py}")
         popup.configure(bg='#111111')
 
@@ -264,17 +328,31 @@ def disparar_popups_falsos():
         tk.Label(frame_tit_pop, text="⚠️ ", fg="#ffcc00", bg="black", font=("Consolas", 11, "bold")).pack(side=tk.LEFT)
         tk.Label(frame_tit_pop, text=titulo.upper(), fg="#ff0033", bg="black", font=("Consolas", 11, "bold")).pack(side=tk.LEFT)
 
-        lbl_txt_pop = tk.Label(conteudo, text=texto, fg="#00ff41", bg="black", font=("Consolas", 10), wraplength=370, justify="left")
+        lbl_txt_pop = tk.Label(conteudo, text=texto, fg="#00ff41", bg="black", font=("Consolas", 9), wraplength=370, justify="left")
         lbl_txt_pop.pack(anchor="w", padx=10, pady=(0, 15))
 
         btn_ok = tk.Button(conteudo, text="OK", bg="#ff0033", fg="white", font=("Consolas", 9, "bold"), relief="flat", command=popup.destroy)
         btn_ok.pack(pady=(0, 10))
 
+        # Toca som do Windows ao abrir popup
+        try:
+            winsound.MessageBeep(winsound.MB_ICONHAND)
+        except:
+            pass
+
         janelas_popups.append(popup)
+
+        # Fila FIFO: fecha janelas antigas para manter no máximo 7
+        while len(janelas_popups) > MAX_POPUPS:
+            p_antigo = janelas_popups.pop(0)
+            try:
+                p_antigo.destroy()
+            except:
+                pass
     except:
         pass
 
-    loop_popups_id = root.after(4000, disparar_popups_falsos)
+    loop_popups_id = root.after(3500, disparar_popups_falsos)
 
 def piscar_tela_final():
     global loop_barra_id, janelas_hacker, estado_piscar
@@ -290,6 +368,7 @@ def piscar_tela_final():
                 frame_centro.configure(bg='#260000')
                 frame_titulo.configure(bg='#260000')
                 lbl_titulo.configure(bg='#260000', fg='white')
+                lbl_timer.configure(bg='#260000', fg='yellow')
                 lbl_terminal.configure(bg='#260000', fg='#ff0033')
                 lbl_barra.configure(bg='#260000', fg='#ff0033', text="[████████████████████] DADOS ROUBADOS [100%]")
         else:
@@ -298,6 +377,7 @@ def piscar_tela_final():
                 frame_centro.configure(bg='black')
                 frame_titulo.configure(bg="black")
                 lbl_titulo.configure(bg='black', fg='#ff0033')
+                lbl_timer.configure(bg='black', fg='#ff0033')
                 lbl_terminal.configure(bg='black', fg='#00ff41')
                 lbl_barra.configure(bg='black', fg='#00ff41', text="[████████████████████] SISTEMA BLOQUEADO [100%]")
 
