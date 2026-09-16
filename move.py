@@ -1,25 +1,53 @@
-import pyautogui
 import time
 import random
+import pyautogui
+from pynput import mouse, keyboard
 
-# Intervalo em segundos (60s = 1 minuto)
-INTERVALO = 60
+# Configurações de tempo (em segundos)
+TEMPO_OCIOSO_ALVO = 5      # 1 minuto sem mexer para ativar
+INTERVALO_VERIFICACAO = 10  # De quanto em quanto tempo o script checa o PC
 
-def mover_mouse():
-    while True:
-        x, y = pyautogui.position()
+ultimo_movimento = time.time()
 
-        # pequeno movimento aleatório (evita padrão fixo)
-        novo_x = x + random.randint(-20, 20)
-        novo_y = y + random.randint(-20, 20)
+# Funções que resetam o cronômetro de ociosidade
+def atualizar_tempo(*args):
+    global ultimo_movimento
+    ultimo_movimento = time.time()
 
-        pyautogui.moveTo(novo_x, novo_y, duration=0.5)
+# Inicia os ouvintes globais em segundo plano separando os eventos corretamente
+listener_mouse = mouse.Listener(
+    on_move=atualizar_tempo,
+    on_click=lambda x, y, button, pressed: atualizar_tempo(),
+    on_scroll=lambda x, y, dx, dy: atualizar_tempo()
+)
+listener_teclado = keyboard.Listener(
+    on_press=atualizar_tempo,
+    on_release=atualizar_tempo
+)
 
-        # opcional: pequeno "click invisível"
-        # pyautogui.click()
-
-        time.sleep(INTERVALO)
+listener_mouse.start()
+listener_teclado.start()
 
 if __name__ == "__main__":
-    print("Rodando... CTRL+C para parar")
-    mover_mouse()
+    print("Monitor de ociosidade rodando... CTRL+C para parar")
+    try:
+        while True:
+            time.sleep(INTERVALO_VERIFICACAO)
+            
+            # Calcula há quantos segundos o usuário está inativo
+            tempo_inativo = time.time() - ultimo_movimento
+            
+            if tempo_inativo >= TEMPO_OCIOSO_ALVO:
+                x, y = pyautogui.position()
+                novo_x = x + random.randint(-20, 20)
+                novo_y = y + random.randint(-20, 20)
+                pyautogui.moveTo(novo_x, novo_y, duration=0.5)
+                
+                # Atualiza o tempo para o mouse não ficar tremendo sem parar
+                ultimo_movimento = time.time()
+                print(f"Movimento anti-ociosidade acionado após {int(tempo_inativo)}s parado.")
+                
+    except KeyboardInterrupt:
+        print("\nEncerrando...")
+        listener_mouse.stop()
+        listener_teclado.stop()
