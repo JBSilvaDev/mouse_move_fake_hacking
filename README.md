@@ -1,29 +1,40 @@
-# Anti-Ausente Hacker (Mouse Move) 🖱️
+# Anti-Ausente Hacker (Mouse Move & Ransomware Prank) 🖱️⚠️
 
-Utilitário em Python que previne o status "Ausente" em aplicativos de comunicação (como Teams, Slack e Discord) e inclui um "Modo Susto/Hacker" ativado por ociosidade.
+Utilitário em Python que previne o status "Ausente" em aplicativos corporativos (como Microsoft Teams, Slack e Discord) e inclui uma tela de "Invasão Hacker / Ransomware" de alto impacto ativada por ociosidade.
+
+---
 
 ## 📌 Sobre o Projeto
 
-O programa roda de forma invisível em segundo plano (background) e executa as seguintes funções:
+O programa executa as seguintes funções em seu computador:
 
-1. **Anti-Ausente Inteligente:** Move ligeiramente o cursor a cada 45 segundos para manter a sessão ativa. O script diferencia movimentos automatizados de interações humanas, garantindo que o Teams continue "Disponível" sem interferir na contagem do tempo de ociosidade.
-2. **Modo Hacker (Protetor de Tela):** Se o computador ficar inativo por 60 segundos (sem toque humano no mouse ou teclado), o script cobre todos os monitores com uma tela simulando uma invasão, exibindo comandos em tempo real, barra de progresso sincronizada e pop-ups de erro crítico.
-3. **Desativação Exclusiva via ESC:** Durante a exibição da tela hacker, movimentações de mouse e outras teclas são ignoradas. Somente ao pressionar a tecla **`ESC`** a tela é encerrada e o sistema retorna ao normal.
-4. **Bandeja do Sistema (System Tray):** Um ícone discreto fica ativo ao lado do relógio do Windows para encerramento rápido com o botão direito.
+1. **Anti-Ausente Inteligente:** Realiza micro-movimentos no cursor a cada **45 segundos**. O script diferencia movimentos automatizados de interações humanas, garantindo que o Teams continue "Disponível" sem interferir na contagem do tempo de ociosidade do modo hacker.
+2. **Modo Invasão / Ransomware (Protetor de Tela):** Se o computador ficar inativo por **60 segundos** (sem toque humano no mouse/teclado), o script cobre todos os monitores com uma simulação realista de invasão.
+3. **Desativação Exclusiva via ESC:** Durante a exibição da tela hacker, interações comuns de mouse e outras teclas são ignoradas. Somente ao pressionar a tecla **`ESC`** a tela é encerrada.
+4. **Modos de Execução Flexíveis:** Permite rodar com suporte a terminal/console de depuração (`move.py`) ou em modo 100% silencioso em segundo plano (`move.pyw`).
 
 ---
 
-## ⚙️ Requisitos
+## 🔥 Recursos e Elementos da Tela Hacker
+
+- **Dados Reais da Vítima:** Extrai e exibe o **Nome do Computador** (Host) e o **Nome do Usuário logado** no Windows no topo dos comandos.
+- **Contador Regressivo Ransomware:** Exibe um cronômetro regressivo (estilo extorsão) em vermelho chamativo.
+- **Sons de Erro Crítico do Windows:** Utiliza a biblioteca nativa `winsound` para emitir os bipes oficiais de erro do Windows ao disparar a tela e a cada novo pop-up.
+- **Zona de Exclusão Central:** Os pop-ups de erro surgem apenas na periferia/bordas da tela, mantendo o terminal central com os comandos 100% visível e desobstruído.
+- **Gerenciamento Inteligente de Pop-ups (Fila FIFO):** Mantém no máximo **7 pop-ups** simultâneos na tela. A partir do 8º, a janela mais antiga é fechada automaticamente.
+- **Sincronização de Progresso:** A barra de progresso avança até 95% e aguarda a exibição de todos os comandos do terminal antes de atingir 100% e iniciar o alerta piscante final.
+- **Suporte Multi-Monitor:** Mapeia e cobre todas as telas conectadas ao computador.
+
+---
+
+## ⚙️ Requisitos e Instalação
 
 - **Python 3.8+**
-- Sistema operacional **Windows** (recomendado para suporte a `.pyw` e `.bat`)
-- Dependências listadas abaixo (`pyautogui`, `pynput`, `screeninfo`, `pystray`, `pillow`)
+- Sistema Operacional **Windows** (necessário para `winsound`, suporte a `.pyw` e arquivos `.bat`)
 
----
+### Passos para Instalação
 
-## 🚀 Instalação
-
-1. Abra o terminal na pasta do projeto, crie e ative o ambiente virtual:
+1. Abra o terminal na pasta do projeto e crie/ative o ambiente virtual:
 
    ```powershell
    python -m venv venv
@@ -31,9 +42,9 @@ O programa roda de forma invisível em segundo plano (background) e executa as s
 
 ```
 
-2. Instale as dependências necessárias:
+2. Instale todas as dependências a partir do arquivo `requirements.txt`:
 ```powershell
-pip install pyautogui pynput screeninfo pystray pillow
+pip install -r requirements.txt
 
 ```
 
@@ -41,15 +52,18 @@ pip install pyautogui pynput screeninfo pystray pillow
 
 ---
 
-## 🛠️ Arquivos do Projeto (`.pyw` e `.bat`)
+## 🛠️ Modos de Execução (`.py` vs `.pyw`)
 
-### 1. O arquivo `.pyw` (`move.pyw`)
+O projeto disponibiliza dois formatos de arquivo para você escolher a melhor forma de uso:
 
-A extensão `.pyw` avisa o Windows para executar o script através do `pythonw.exe`, garantindo que nenhuma janela preta de terminal (CMD) fique visível durante a execução.
+* **`move.py` (Modo Desenvolvedor / Console):** Executa exibindo a janela do terminal. Ideal para testes, depuração e acompanhamento de logs em tempo real.
+* **`move.pyw` (Modo Silencioso / Produção):** Executa utilizando o `pythonw.exe`, rodando silenciosamente em segundo plano sem abrir nenhuma janela de prompt de comando (CMD).
 
-### 2. O arquivo de inicialização `play.bat`
+---
 
-Para iniciar o script com um duplo clique sem abrir o terminal nem precisar ativar o `venv` manualmente, crie um arquivo chamado `play.bat` na raiz do projeto:
+## 🚀 Arquivo de Inicialização (`play.bat`)
+
+Para facilitar a inicialização sem a necessidade de ativar o ambiente virtual manualmente pelo terminal, utilize o arquivo `play.bat`:
 
 ```bat
 @echo off
@@ -58,46 +72,48 @@ exit
 
 ```
 
+> **Dica:** Caso prefira rodar com a janela do console visível para depuração, basta alterar a segunda linha do `play.bat` para usar o arquivo `.py`:
+> `start "" "venv\Scripts\python.exe" "move.py"`
+
 ---
 
 ## 💻 Como Usar
 
 ### Iniciando o programa
 
-Dê um **duplo clique no arquivo `executar.bat**`. O programa iniciará silenciosamente em segundo plano e exibirá um ícone na **Bandeja do Sistema (System Tray)**, ao lado do relógio do Windows.
+Dê um **duplo clique no arquivo `play.bat**`. O aplicativo entrará em execução e o ícone do projeto aparecerá na **Bandeja do Sistema (System Tray)**, próximo ao relógio do Windows.
 
-### Encerrando o programa
+### Encerrando a Tela Hacker
 
-1. Vá até a **Bandeja do Sistema** (ao lado do relógio).
-2. Clique com o **botão direito** no ícone do aplicativo.
-3. Selecione a opção **"Sair / Fechar"**.
+Caso a tela de invasão seja disparada, pressione a tecla **`ESC`** no teclado para fechar todas as janelas e retornar à área de trabalho.
+
+### Encerrando o Programa Definitivamente
+
+1. Localize o ícone da aplicação na **Bandeja do Sistema** (ao lado do relógio do Windows).
+2. Clique com o **botão direito** no ícone.
+3. Clique na opção **"Sair / Fechar"**.
 
 ---
 
-## 🔧 Configurações
+## 🔧 Configurações Personalizadas
 
-Os intervalos de tempo e ociosidade podem ser ajustados no topo do arquivo `move.pyw`:
+Os tempos e limites podem ser ajustados no topo dos arquivos `move.py` / `move.pyw`:
 
 ```python
 # ================= CONFIGURAÇÕES =================
-TEMPO_OCIOSO_ALVO = 60      # Tempo sem interação humana (em segundos) para ativar a tela hacker
-INTERVALO_MOVER_MOUSE = 45  # Intervalo (em segundos) para movimentação automática (Anti-Teams)
+TEMPO_OCIOSO_ALVO = 60      # Tempo inativo (em seg) sem toque humano para ativar o modo hacker
+INTERVALO_MOVER_MOUSE = 45  # Intervalo (em seg) para mover o cursor (Anti-Teams)
+MAX_POPUPS = 7              # Limite máximo de janelas de pop-up simultâneas
+TEMPO_CONTADOR_SEG = 180    # Tempo da contagem regressiva (180 seg = 3 minutos)
 # ==================================================
 
 ```
 
 ---
 
-## 🧠 Estrutura e Bibliotecas
+## 💡 Dica de Inicialização Automática com o Windows
 
-* **`pyautogui`**: Realiza micro-movimentos no mouse para manter a sessão do sistema e dos apps ativa.
-* **`pynput`**: Monitora eventos globais de entrada, permitindo capturar a tecla `ESC` e diferenciar interações humanas do movimento do robô.
-* **`screeninfo`**: Mapeia a resolução de múltiplos monitores para cobrir todas as telas ao ativar o modo hacker.
-* **`pystray` + `Pillow**`: Gerencia o ícone e o menu de encerramento na bandeja do sistema.
+Para que o script inicie automaticamente sempre que ligar o computador:
 
----
-
-## ⚠️ Observações Importantes
-
-* **Sair da Tela Hacker:** Lembre-se de pressionar a tecla **`ESC`** para fechar a tela de ociosidade e liberar a área de trabalho.
-* **Início Automático com o Windows:** Para inicializar o script junto com o Windows, pressione `Win + R`, digite `shell:startup` e cole um atalho do arquivo `play.bat` dentro da pasta que se abrir.
+1. Pressione `Win + R`, digite `shell:startup` e pressione **Enter**.
+2. Cole um **Atalho** do arquivo `play.bat` dentro da pasta de Inicialização que foi aberta.
