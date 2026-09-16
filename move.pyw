@@ -9,13 +9,14 @@ import pystray
 from PIL import Image, ImageDraw
 
 # ================= CONFIGURAÇÕES =================
-TEMPO_OCIOSO_ALVO = 2      # 1 minuto sem mexer para ativar a pegadinha
-INTERVALO_VERIFICACAO = 10  # Checagem de ociosidade
-INTERVALO_MOVER_MOUSE = 45  # Para o Teams não ficar ausente
+TEMPO_OCIOSO_ALVO = 100      # 1 minuto sem mexer para ativar a pegadinha
+INTERVALO_MOVER_MOUSE = 90  # Intervalo para mover o mouse (Anti-Teams)
 # ==================================================
 
 ultimo_movimento = time.time()
 ultimo_movimento_mouse = time.time()
+movendo_pelo_script = False
+
 janelas_hacker = []
 janelas_popups = [] 
 texto_atual_idx = 0
@@ -30,27 +31,44 @@ COMANDOS_HACKER = [
     "[+] INICIALIZANDO KERNEL EXPLOIT (CVE-2026-9981)...",
     "[+] CONECTANDO AO SERVIDOR REMOTO (IP: 185.220.101.5:666)...",
     "[!] BYPASSING FIREWALL CORPORATIVO E VPN...",
+    "[!] DESATIVANDO WINDOWS DEFENDER E AGENTE DE EDR...",
     "[+] ACESSO ROOT CONCEDIDO AO SUBSISTEMA.",
     "[>] CAPTURANDO WEBCAM E MICROFONE...",
     "[>] EXTRAINDO SENHAS SALVAS DO CHROME / EDGE...",
+    "[>] SEQUESTRANDO TOKENS DE SESSÃO DO TEAMS E SLACK...",
+    "[+] INSTALANDO KEYLOGGER EM NÍVEL DE DRIVER DE TECLADO...",
     "[>] COPIANDO DIRETÓRIO 'Documentos' PARA /root/exfiltrated_data/...",
+    "[>] EXFILTRANDO CHAVES SSH E CERTIFICADOS DE REDE...",
+    "[!] DELETANDO CÓPIAS DE SOMBRA (VSS) E BACKUPS LOCAIS...",
     "[!] ALERTA CRÍTICO: CHAVE DE CRIPTOGRAFIA DE DISCO ALTERADA.",
-    "--- MEXA O MOUSE OU DIGITE ALGO PARA INTERROMPER O PROCESSO ---"
+    "--- PRESSIONE ESC PARA INTERROMPER O PROCESSO ---"
 ]
 
-def registrar_atividade(*args):
+def ao_mexer_mouse(*args):
+    """Reseta a ociosidade apenas se for um movimento humano real"""
     global ultimo_movimento
-    ultimo_movimento = time.time()
-    fechar_todas_as_telas()
+    if movendo_pelo_script:
+        return
+    if not janelas_hacker:
+        ultimo_movimento = time.time()
+
+def ao_pressionar_tecla(key):
+    """Detecta teclas: se a tela hacker estiver ativa, SOMENTE o ESC fecha tudo"""
+    global ultimo_movimento
+    if janelas_hacker:
+        if key == keyboard.Key.esc:
+            fechar_todas_as_telas()
+            ultimo_movimento = time.time()
+    else:
+        ultimo_movimento = time.time()
 
 listener_mouse = mouse.Listener(
-    on_move=registrar_atividade,
-    on_click=lambda x, y, b, p: registrar_atividade(),
-    on_scroll=lambda x, y, dx, dy: registrar_atividade()
+    on_move=ao_mexer_mouse,
+    on_click=ao_mexer_mouse,
+    on_scroll=ao_mexer_mouse
 )
 listener_teclado = keyboard.Listener(
-    on_press=registrar_atividade,
-    on_release=registrar_atividade
+    on_press=ao_pressionar_tecla
 )
 listener_mouse.start()
 listener_teclado.start()
@@ -82,20 +100,23 @@ def fechar_todas_as_telas():
     janelas_hacker.clear()
 
 def verificar_sistema():
-    global ultimo_movimento, ultimo_movimento_mouse, janelas_hacker
+    global ultimo_movimento, ultimo_movimento_mouse, janelas_hacker, movendo_pelo_script
     tempo_atual = time.time()
     tempo_inativo = tempo_atual - ultimo_movimento
 
     if tempo_inativo >= TEMPO_OCIOSO_ALVO and not janelas_hacker:
         criar_janelas_hacker()
 
-    if tempo_inativo >= INTERVALO_MOVER_MOUSE:
-        if tempo_atual - ultimo_movimento_mouse >= INTERVALO_MOVER_MOUSE:
-            x, y = pyautogui.position()
-            novo_x = x + random.randint(-15, 15)
-            novo_y = y + random.randint(-15, 15)
-            pyautogui.moveTo(novo_x, novo_y, duration=0.3)
-            ultimo_movimento_mouse = tempo_atual
+    if tempo_atual - ultimo_movimento_mouse >= INTERVALO_MOVER_MOUSE:
+        x, y = pyautogui.position()
+        novo_x = x + random.randint(-15, 15)
+        novo_y = y + random.randint(-15, 15)
+        
+        movendo_pelo_script = True
+        pyautogui.moveTo(novo_x, novo_y, duration=0.3)
+        movendo_pelo_script = False
+        
+        ultimo_movimento_mouse = tempo_atual
 
     root.after(500, verificar_sistema)
 
@@ -189,18 +210,22 @@ def animar_barra():
     if not janelas_hacker:
         return
 
-    if progresso_atual < 100:
-        progresso_atual += random.randint(4, 12)
-        if progresso_atual > 100: 
-            progresso_atual = 100
+    limite_maximo = 95 if texto_atual_idx < len(COMANDOS_HACKER) else 100
+
+    if progresso_atual < limite_maximo:
+        progresso_atual += random.randint(3, 7)
+        if progresso_atual > limite_maximo: 
+            progresso_atual = limite_maximo
             
         blocos = int(progresso_atual / 5)
         barra_str = "[" + "█" * blocos + "░" * (20 - blocos) + f"] {progresso_atual}%"
         lbl_barra.config(text=barra_str)
         
-        loop_barra_id = root.after(220, animar_barra)
-    else:
+        loop_barra_id = root.after(300, animar_barra)
+    elif progresso_atual >= 100:
         piscar_tela_final()
+    else:
+        loop_barra_id = root.after(300, animar_barra)
 
 def disparar_popups_falsos():
     global loop_popups_id, janelas_hacker, janelas_popups
@@ -279,17 +304,14 @@ def piscar_tela_final():
     loop_barra_id = root.after(350, piscar_tela_final)
 
 def sair_programa(icon, item):
-    """Função chamada ao clicar em Sair na bandeja"""
     listener_mouse.stop()
     listener_teclado.stop()
     icon.stop()
     root.quit()
 
 def setup_tray():
-    """Cria um ícone dinâmico em formato de escudo/terminal para a bandeja"""
     image = Image.new('RGB', (64, 64), color='black')
     draw = ImageDraw.Draw(image)
-    # Desenha um detalhe verde/vermelho simples para o ícone
     draw.rectangle([16, 16, 48, 48], outline='#00ff41', width=3)
     draw.text((24, 22), ">", fill='#ff0033')
 
@@ -307,7 +329,6 @@ root = tk.Tk()
 root.withdraw()
 root.after(500, verificar_sistema)
 
-# Roda a bandeja do sistema em uma Thread separada para não travar a interface do Tkinter
 tray_thread = threading.Thread(target=setup_tray, daemon=True)
 tray_thread.start()
 

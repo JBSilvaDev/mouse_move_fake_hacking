@@ -1,80 +1,103 @@
-# Mouse Move
+# Anti-Ausente Hacker (Mouse Move) 🖱️
 
-Pequeno utilitário em Python para movimentar o cursor periodicamente.
+Utilitário em Python que previne o status "Ausente" em aplicativos de comunicação (como Teams, Slack e Discord) e inclui um "Modo Susto/Hacker" ativado por ociosidade.
 
-## Sobre
+## 📌 Sobre o Projeto
 
-Este projeto mantém o cursor do mouse em movimento enquanto o programa estiver em execução. A cada 60 segundos, ele lê a posição atual e move o cursor para uma posição aleatória próxima, com uma variação de até 20 pixels nos eixos horizontal e vertical.
+O programa roda de forma invisível em segundo plano (background) e executa as seguintes funções:
 
-O programa permanece executando até ser interrompido manualmente com `Ctrl+C`.
+1. **Anti-Ausente Inteligente:** Move ligeiramente o cursor a cada 45 segundos para manter a sessão ativa. O script diferencia movimentos automatizados de interações humanas, garantindo que o Teams continue "Disponível" sem interferir na contagem do tempo de ociosidade.
+2. **Modo Hacker (Protetor de Tela):** Se o computador ficar inativo por 60 segundos (sem toque humano no mouse ou teclado), o script cobre todos os monitores com uma tela simulando uma invasão, exibindo comandos em tempo real, barra de progresso sincronizada e pop-ups de erro crítico.
+3. **Desativação Exclusiva via ESC:** Durante a exibição da tela hacker, movimentações de mouse e outras teclas são ignoradas. Somente ao pressionar a tecla **`ESC`** a tela é encerrada e o sistema retorna ao normal.
+4. **Bandeja do Sistema (System Tray):** Um ícone discreto fica ativo ao lado do relógio do Windows para encerramento rápido com o botão direito.
 
-## Requisitos
+---
 
-- Python 3.8 ou superior
-- Sistema operacional com interface gráfica compatível com o PyAutoGUI
-- Dependências listadas em `requirements.txt`
+## ⚙️ Requisitos
 
-## Instalação
+- **Python 3.8+**
+- Sistema operacional **Windows** (recomendado para suporte a `.pyw` e `.bat`)
+- Dependências listadas abaixo (`pyautogui`, `pynput`, `screeninfo`, `pystray`, `pillow`)
 
-No terminal, a partir da pasta do projeto, crie e ative um ambiente virtual:
+---
 
+## 🚀 Instalação
+
+1. Abra o terminal na pasta do projeto, crie e ative o ambiente virtual:
+
+   ```powershell
+   python -m venv venv
+   .\venv\Scripts\Activate.ps1
+
+```
+
+2. Instale as dependências necessárias:
 ```powershell
-python -m venv venv
-venv\Scripts\Activate.ps1
+pip install pyautogui pynput screeninfo pystray pillow
+
 ```
 
-Instale as dependências:
 
-```powershell
-pip install -r requirements.txt
+
+---
+
+## 🛠️ Arquivos do Projeto (`.pyw` e `.bat`)
+
+### 1. O arquivo `.pyw` (`move.pyw`)
+
+A extensão `.pyw` avisa o Windows para executar o script através do `pythonw.exe`, garantindo que nenhuma janela preta de terminal (CMD) fique visível durante a execução.
+
+### 2. O arquivo de inicialização `play.bat`
+
+Para iniciar o script com um duplo clique sem abrir o terminal nem precisar ativar o `venv` manualmente, crie um arquivo chamado `play.bat` na raiz do projeto:
+
+```bat
+@echo off
+start "" "venv\Scripts\pythonw.exe" "move.pyw"
+exit
+
 ```
 
-## Uso
+---
 
-Execute o script com:
+## 💻 Como Usar
 
-```powershell
-python move.py
-```
+### Iniciando o programa
 
-Quando iniciado, o programa exibe:
+Dê um **duplo clique no arquivo `executar.bat**`. O programa iniciará silenciosamente em segundo plano e exibirá um ícone na **Bandeja do Sistema (System Tray)**, ao lado do relógio do Windows.
 
-```text
-Rodando... CTRL+C para parar
-```
+### Encerrando o programa
 
-Para encerrar, pressione `Ctrl+C` no terminal em que o programa está rodando.
+1. Vá até a **Bandeja do Sistema** (ao lado do relógio).
+2. Clique com o **botão direito** no ícone do aplicativo.
+3. Selecione a opção **"Sair / Fechar"**.
 
-## Configuração
+---
 
-O intervalo entre os movimentos é definido pela constante `INTERVALO` em `move.py` e está configurado para 60 segundos:
+## 🔧 Configurações
+
+Os intervalos de tempo e ociosidade podem ser ajustados no topo do arquivo `move.pyw`:
 
 ```python
-INTERVALO = 60
+# ================= CONFIGURAÇÕES =================
+TEMPO_OCIOSO_ALVO = 60      # Tempo sem interação humana (em segundos) para ativar a tela hacker
+INTERVALO_MOVER_MOUSE = 45  # Intervalo (em segundos) para movimentação automática (Anti-Teams)
+# ==================================================
+
 ```
 
-Altere esse valor, em segundos, caso precise de outra frequência.
+---
 
-## Funcionamento
+## 🧠 Estrutura e Bibliotecas
 
-1. Obtém a posição atual do cursor.
-2. Gera deslocamentos aleatórios entre `-20` e `20` pixels para cada eixo.
-3. Move o cursor para a nova posição em 0,5 segundo.
-4. Aguarda o intervalo configurado e repete o processo.
+* **`pyautogui`**: Realiza micro-movimentos no mouse para manter a sessão do sistema e dos apps ativa.
+* **`pynput`**: Monitora eventos globais de entrada, permitindo capturar a tecla `ESC` e diferenciar interações humanas do movimento do robô.
+* **`screeninfo`**: Mapeia a resolução de múltiplos monitores para cobrir todas as telas ao ativar o modo hacker.
+* **`pystray` + `Pillow**`: Gerencia o ícone e o menu de encerramento na bandeja do sistema.
 
-O clique automático está desativado no código. A chamada `pyautogui.click()` aparece apenas como opção comentada e não é executada.
+---
 
-## Dependências principais
+## ⚠️ Observações Importantes
 
-- [PyAutoGUI](https://pyautogui.readthedocs.io/): leitura da posição e movimentação do cursor.
-- `MouseInfo`, `PyGetWindow`, `PyMsgBox`, `pyperclip`, `PyRect`, `PyScreeze` e `pytweening`: dependências fixadas para o funcionamento do PyAutoGUI.
-
-## Observações
-
-- O script precisa de acesso à sessão gráfica e ao controle do mouse.
-- Ao executar, movimentos feitos pelo usuário podem ser acompanhados pelo movimento automático do programa.
-- Em ambientes corporativos, verifique as políticas locais antes de usar automações de entrada.
-
-## Licença
-
-Nenhuma licença foi definida no repositório até o momento.
+* **Sair da Tela Hacker:** Lembre-se de pressionar a tecla **`ESC`** para fechar a tela de ociosidade e liberar a área de trabalho.
+* **Início Automático com o Windows:** Para inicializar o script junto com o Windows, pressione `Win + R`, digite `shell:startup` e cole um atalho do arquivo `play.bat` dentro da pasta que se abrir.
