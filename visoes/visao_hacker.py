@@ -8,7 +8,8 @@ efeito glitch de interferência visual e barra de progresso do ataque.
 import random
 import tkinter as tk
 from screeninfo import get_monitors
-from configuracao import ARQUIVOS_PARA_DELETAR, TEMPO_CONTADOR_SEG
+import configuracao
+from configuracao import ARQUIVOS_PARA_DELETAR
 
 class VisaoHacker:
     """
@@ -108,8 +109,8 @@ class VisaoHacker:
         )
 
         # 3. Timer Regressivo
-        minutos_ini = TEMPO_CONTADOR_SEG // 60
-        segundos_ini = TEMPO_CONTADOR_SEG % 60
+        minutos_ini = configuracao.TEMPO_CONTADOR_SEG // 60
+        segundos_ini = configuracao.TEMPO_CONTADOR_SEG % 60
         self.item_timer = self.canvas_tela.create_text(
             centro_x, int(self.altura_tela * 0.29),
             text=f"TEMPO RESTANTE PARA BLOQUEIO DEFINITIVO: {minutos_ini:02d}:{segundos_ini:02d}",

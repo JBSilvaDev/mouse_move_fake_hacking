@@ -8,7 +8,8 @@ import random
 import winsound
 import tkinter as tk
 from screeninfo import get_monitors
-from configuracao import MAX_POPUPS, NOME_PC, NOME_USUARIO, TEMPO_OCIOSO_ALVO
+import configuracao
+from configuracao import NOME_PC, NOME_USUARIO
 
 class VisaoPopups:
     """
@@ -107,7 +108,7 @@ class VisaoPopups:
             self.janelas_popups.append(popup)
 
             # Mantém apenas a quantidade máxima permitida de janelas
-            while len(self.janelas_popups) > MAX_POPUPS:
+            while len(self.janelas_popups) > configuracao.MAX_POPUPS:
                 p_antigo = self.janelas_popups.pop(0)
                 try:
                     p_antigo.destroy()
@@ -151,7 +152,7 @@ class VisaoPopups:
 
             msg = (
                 "Seu PC está 100% seguro!\n\n"
-                f"Você ficou {TEMPO_OCIOSO_ALVO} segundos sem mexer no mouse e o modo\n"
+                f"Você ficou {configuracao.TEMPO_OCIOSO_ALVO} segundos sem mexer no mouse e o modo\n"
                 "Anti-Ausente ativou para proteger seu status no Teams/Slack.\n\n"
                 "Vá tomar um café e relaxar! ☕"
             )
@@ -167,8 +168,13 @@ class VisaoPopups:
             )
             btn_fechar.pack(pady=(15, 0))
 
+            popup_rev.bind("<Escape>", lambda e: ao_fechar_tudo())
+            popup_rev.bind("<Return>", lambda e: ao_fechar_tudo())
+
             popup_rev.deiconify()
             popup_rev.lift()
+            popup_rev.focus_force()
+            btn_fechar.focus_set()
             self.janelas_popups.append(popup_rev)
 
             try:

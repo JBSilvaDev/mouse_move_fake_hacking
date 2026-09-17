@@ -6,7 +6,7 @@ e renderização contínua dos quadros de vídeo capturados.
 """
 
 import tkinter as tk
-from configuracao import TEMPO_ATIVAR_WEBCAM
+import configuracao
 
 class VisaoWebcam:
     """
@@ -42,7 +42,7 @@ class VisaoWebcam:
 
         self.lbl_cabecalho = tk.Label(
             self.frame_container,
-            text=f"⏳ WEBCAM (INICIANDO EM {TEMPO_ATIVAR_WEBCAM}s...)",
+            text=f"⏳ WEBCAM (INICIANDO EM {configuracao.TEMPO_ATIVAR_WEBCAM}s...)",
             fg="#ffcc00",
             bg="#000000",
             font=("Consolas", 7, "bold")

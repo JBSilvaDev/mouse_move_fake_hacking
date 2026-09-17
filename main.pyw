@@ -5,6 +5,7 @@ no padrão arquitetural MVP (Model-View-Presenter).
 Executável em segundo plano sem janela de console através do executável pythonw.exe.
 """
 
+import sys
 import tkinter as tk
 from apresentadores.apresentador_principal import ApresentadorPrincipal
 
@@ -30,6 +31,8 @@ def main():
         root.mainloop()
     except KeyboardInterrupt:
         apresentador.encerrar_aplicacao()
+    finally:
+        sys.exit(0)
 
 if __name__ == "__main__":
     main()

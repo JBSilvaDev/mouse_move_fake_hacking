@@ -11,17 +11,13 @@ import winsound
 import tkinter as tk
 from datetime import datetime
 
+import configuracao
 from configuracao import (
     COMANDOS_HACKER,
-    INTERVALO_MOVER_MOUSE,
     MAPA_ALTURA,
     MAPA_LARGURA,
     NOME_PC,
     NOME_USUARIO,
-    TEMPO_ATIVAR_WEBCAM,
-    TEMPO_OCIOSO_ALVO,
-    USAR_GEOLOCALIZACAO,
-    USAR_WEBCAM
 )
 from modelos.estado_aplicacao import EstadoAplicacao
 from modelos.monitor_entrada import MonitorEntrada
@@ -105,7 +101,7 @@ class ApresentadorPrincipal:
         self.visao_bandeja.iniciar()
 
         # Pré-carrega dados do mapa e imagem base para evitar lag na transição
-        if USAR_GEOLOCALIZACAO:
+        if configuracao.USAR_GEOLOCALIZACAO:
             self._preparar_mapa_global()
 
         # Inicia verificação periódica de inatividade e movimentação do cursor
@@ -133,12 +129,12 @@ class ApresentadorPrincipal:
         tempo_inativo = self.estado.tempo_sem_atividade()
 
         # Dispara a tela hacker se o tempo ocioso for atingido e ela não estiver ativa
-        if tempo_inativo >= TEMPO_OCIOSO_ALVO and not self.visao_hacker.esta_ativa():
+        if tempo_inativo >= configuracao.TEMPO_OCIOSO_ALVO and not self.visao_hacker.esta_ativa():
             log(f"Inatividade de {int(tempo_inativo)}s. Ativando Tela Hacker...", "ALERTA")
             self.ativar_modo_hacker()
 
         # Movimentação preventiva periódica do mouse
-        if self.estado.tempo_desde_ultimo_movimento_mouse() >= INTERVALO_MOVER_MOUSE:
+        if self.estado.tempo_desde_ultimo_movimento_mouse() >= configuracao.INTERVALO_MOVER_MOUSE:
             self.monitor_entrada.ignorar_eventos_script = True
             novo_x, novo_y = self.servico_mouse.mover_preventivamente()
             self.monitor_entrada.ignorar_eventos_script = False
@@ -163,17 +159,19 @@ class ApresentadorPrincipal:
         tela_h = self.visao_hacker.altura_tela
 
         # Constrói o widget da Webcam no canto superior esquerdo
-        if USAR_WEBCAM:
+        if configuracao.USAR_WEBCAM:
             pos_wx = int(tela_w * 0.03)
             pos_wy = int(tela_h * 0.03)
             self.visao_webcam.criar_elementos(canvas, pos_wx, pos_wy)
             self._timer_webcam_id = self.root.after(
-                TEMPO_ATIVAR_WEBCAM * 1000,
+                configuracao.TEMPO_ATIVAR_WEBCAM * 1000,
                 self.ativar_stream_webcam
             )
 
         # Constrói o mapa mundi no canto inferior direito
-        if USAR_GEOLOCALIZACAO and self.estado.dados_geolocalizacao:
+        if configuracao.USAR_GEOLOCALIZACAO:
+            if not self.estado.dados_geolocalizacao:
+                self._preparar_mapa_global()
             mapa_x0 = tela_w - MAPA_LARGURA - 25
             mapa_y0 = tela_h - MAPA_ALTURA - 40
             self.visao_mapa.criar_elementos_mapa(
@@ -191,7 +189,7 @@ class ApresentadorPrincipal:
 
     def desativar_modo_hacker(self):
         """Encerra a tela cheia hacker, para a webcam e fecha todos os popups."""
-        if USAR_WEBCAM:
+        if configuracao.USAR_WEBCAM:
             self.servico_webcam.encerrar()
             self.visao_webcam.destruir()
 
@@ -358,7 +356,10 @@ class ApresentadorPrincipal:
         """Trata o cancelamento imediato ao pressionar a tecla ESC."""
         if self.visao_hacker.esta_ativa() or len(self.visao_popups.janelas_popups) > 0:
             log("Tecla ESC pressionada! Fechando tudo...", "CANCELAR")
-            self.desativar_modo_hacker()
+            try:
+                self.root.after(0, self.desativar_modo_hacker)
+            except Exception:
+                self.desativar_modo_hacker()
         self.estado.registrar_atividade_usuario()
 
     def ao_interagir_usuario(self):
@@ -369,8 +370,35 @@ class ApresentadorPrincipal:
     def encerrar_aplicacao(self):
         """Encerra com segurança todos os serviços, listeners e a interface Tkinter."""
         log("Encerrando aplicação...", "SAIR")
-        self.monitor_entrada.parar()
-        if USAR_WEBCAM:
-            self.servico_webcam.encerrar()
-        self.visao_bandeja.parar()
-        self.root.quit()
+        try:
+            self.desativar_modo_hacker()
+        except Exception:
+            pass
+
+        try:
+            self.monitor_entrada.parar()
+        except Exception:
+            pass
+
+        if configuracao.USAR_WEBCAM:
+            try:
+                self.servico_webcam.encerrar()
+            except Exception:
+                pass
+
+        try:
+            self.visao_bandeja.parar()
+        except Exception:
+            pass
+
+        def _fechar_tk():
+            try:
+                self.root.quit()
+                self.root.destroy()
+            except Exception:
+                pass
+
+        try:
+            self.root.after(0, _fechar_tk)
+        except Exception:
+            _fechar_tk()

@@ -8,15 +8,15 @@ import os
 import socket
 
 # ================= TEMPOS E LIMITES =================
-TEMPO_OCIOSO_ALVO = 5       # Tempo em segundos sem interação para disparar a tela hacker
-INTERVALO_MOVER_MOUSE = 100   # Intervalo em segundos para movimentação preventiva do mouse (Anti-Teams)
-MAX_POPUPS = 7                # Limite máximo simultâneo de janelas de erro falsas
-TEMPO_CONTADOR_SEG = 180      # Duração da contagem regressiva em segundos (3 minutos)
-TEMPO_ATIVAR_WEBCAM = 15      # Segundos decorridos da invasão até ligar a webcam
+TEMPO_OCIOSO_ALVO = 120 # Tempo em segundos sem interação para disparar a tela hacker
+INTERVALO_MOVER_MOUSE = 100 # Intervalo em segundos para movimentação preventiva do mouse (Anti-Teams)
+MAX_POPUPS = 7 # Limite máximo simultâneo de janelas de erro falsas
+TEMPO_CONTADOR_SEG = 180 # Duração da contagem regressiva em segundos (3 minutos)
+TEMPO_ATIVAR_WEBCAM = 15 # Segundos decorridos da invasão até ligar a webcam
 
 # ================= RECURSOS E FLAGS =================
-USAR_WEBCAM = True            # Ativa ou desativa o streaming falso da webcam
-USAR_GEOLOCALIZACAO = True    # Ativa ou desativa a geolocalização e o mapa mundial de ataques
+USAR_WEBCAM = False # Ativa ou desativa o streaming falso da webcam
+USAR_GEOLOCALIZACAO = True # Ativa ou desativa a geolocalização e o mapa mundial de ataques
 
 # ================= IDENTIFICAÇÃO DO SISTEMA =================
 NOME_USUARIO = os.getlogin().upper()
@@ -87,3 +87,56 @@ TIPOS_ATAQUE = [
     {"tipo": "ZERO-DAY", "cor": "#00ff41"},
     {"tipo": "DATA EXFIL", "cor": "#ff3366"}
 ]
+
+# ================= FUNÇÕES DE ATUALIZAÇÃO DINÂMICA =================
+def atualizar_configuracoes_em_memoria(novos_valores: dict):
+    """
+    Atualiza as variáveis de configuração deste módulo em tempo de execução.
+    
+    Args:
+        novos_valores (dict): Dicionário com os nomes das variáveis e seus novos valores.
+    """
+    g = globals()
+    for chave, valor in novos_valores.items():
+        if chave in g:
+            g[chave] = valor
+
+def salvar_configuracoes_no_arquivo(novos_valores: dict) -> bool:
+    """
+    Atualiza as variáveis em memória e persiste as alterações no arquivo configuracao.py.
+    
+    Args:
+        novos_valores (dict): Dicionário com os nomes das variáveis e seus novos valores.
+        
+    Returns:
+        bool: True se salvo com sucesso, False caso contrário.
+    """
+    atualizar_configuracoes_em_memoria(novos_valores)
+    caminho_arq = os.path.abspath(__file__)
+    try:
+        with open(caminho_arq, "r", encoding="utf-8") as f:
+            linhas = f.readlines()
+
+        novas_linhas = []
+        for linha in linhas:
+            linha_modificada = False
+            for chave, valor in novos_valores.items():
+                prefixo = f"{chave} ="
+                prefixo_sem_espaco = f"{chave}="
+                linha_limpa = linha.strip()
+                if linha_limpa.startswith(prefixo) or linha_limpa.startswith(prefixo_sem_espaco):
+                    partes = linha.split("#", 1)
+                    comentario = f" #{partes[1]}" if len(partes) > 1 else "\n"
+                    novas_linhas.append(f"{chave} = {valor}{comentario.rstrip()}\n")
+                    linha_modificada = True
+                    break
+            if not linha_modificada:
+                novas_linhas.append(linha)
+
+        with open(caminho_arq, "w", encoding="utf-8") as f:
+            f.writelines(novas_linhas)
+        return True
+    except Exception as e:
+        print(f"Erro ao persistir configuracao.py: {e}")
+        return False
+

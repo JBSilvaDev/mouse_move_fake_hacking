@@ -5,7 +5,7 @@ como contadores de tempo, flags de execução e dados em cache.
 """
 
 import time
-from configuracao import TEMPO_CONTADOR_SEG
+import configuracao
 
 class EstadoAplicacao:
     """
@@ -26,7 +26,7 @@ class EstadoAplicacao:
         
         self.texto_atual_idx = 0
         self.progresso_atual = 0
-        self.tempo_restante_contador = TEMPO_CONTADOR_SEG
+        self.tempo_restante_contador = configuracao.TEMPO_CONTADOR_SEG
         self.estado_piscar = False
         
         self.dados_geolocalizacao = None
@@ -45,7 +45,7 @@ class EstadoAplicacao:
         """Reseta os índices de animação e timers para uma nova execução da tela hacker."""
         self.texto_atual_idx = 0
         self.progresso_atual = 0
-        self.tempo_restante_contador = TEMPO_CONTADOR_SEG
+        self.tempo_restante_contador = configuracao.TEMPO_CONTADOR_SEG
         self.estado_piscar = False
         self.tela_hacker_ativa = False
         self.registrar_atividade_usuario()
