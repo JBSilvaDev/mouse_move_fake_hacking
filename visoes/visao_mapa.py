@@ -274,9 +274,9 @@ class VisaoMapa:
             return
 
         self.frame_anim_mapa += 1
-        alvo_lat = dados_geo.get('lat', -18.0536)
-        alvo_lon = dados_geo.get('lon', -39.5508)
-        alvo_cidade = dados_geo.get('city', 'MUCURI')
+        alvo_lat = dados_geo.get('lat', 0.0)
+        alvo_lon = dados_geo.get('lon', 0.0)
+        alvo_cidade = dados_geo.get('city', 'DESCONHECIDA')
 
         lx, ly = self.lat_lon_para_xy(alvo_lat, alvo_lon, self.largura, self.altura)
         alvo_x = x_offset + lx
