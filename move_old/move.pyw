@@ -26,7 +26,7 @@ INTERVALO_MOVER_MOUSE = 100  # Intervalo para mover o mouse (Anti-Teams)
 MAX_POPUPS = 7              # Limite máximo de janelas de erro
 TEMPO_CONTADOR_SEG = 180    # 3 minutos de contagem regressiva
 USAR_WEBCAM = True          # True = Exibe webcam / False = Desativa webcam
-TEMPO_ATIVAR_WEBCAM = 8     # Segundos após a invasão para ligar a webcam (Timer da câmera)
+TEMPO_ATIVAR_WEBCAM = 15     # Segundos após a invasão para ligar a webcam (Timer da câmera)
 USAR_GEOLOCALIZACAO = True  # True = Busca localização e exibe o MAPA ESTILO FILME
 # ==================================================
 
