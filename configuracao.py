@@ -8,7 +8,7 @@ import os
 import socket
 
 # ================= TEMPOS E LIMITES =================
-TEMPO_OCIOSO_ALVO = 120 # Tempo em segundos sem interação para disparar a tela hacker
+TEMPO_OCIOSO_ALVO = 5 # Tempo em segundos sem interação para disparar a tela hacker
 INTERVALO_MOVER_MOUSE = 100 # Intervalo em segundos para movimentação preventiva do mouse (Anti-Teams)
 MAX_POPUPS = 7 # Limite máximo simultâneo de janelas de erro falsas
 TEMPO_CONTADOR_SEG = 180 # Duração da contagem regressiva em segundos (3 minutos)
@@ -17,6 +17,7 @@ TEMPO_ATIVAR_WEBCAM = 15 # Segundos decorridos da invasão até ligar a webcam
 # ================= RECURSOS E FLAGS =================
 USAR_WEBCAM = False # Ativa ou desativa o streaming falso da webcam
 USAR_GEOLOCALIZACAO = True # Ativa ou desativa a geolocalização e o mapa mundial de ataques
+ATIVAR_TELA_HACKER = False # Se True, exibe a tela hacker ao atingir o tempo ocioso; se False, apenas roda o anti-ausente silencioso
 
 # ================= IDENTIFICAÇÃO DO SISTEMA =================
 NOME_USUARIO = os.getlogin().upper()

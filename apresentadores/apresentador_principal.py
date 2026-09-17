@@ -126,25 +126,33 @@ class ApresentadorPrincipal:
     def verificar_sistema(self):
         """
         Ciclo de verificação periódica do sistema:
-        1. Avalia se o usuário atingiu o tempo ocioso para disparar a tela hacker.
-        2. Avalia se deve movimentar o mouse para manter o Teams/Slack ativo.
+        1. Avalia se o usuário atingiu o tempo ocioso para disparar a tela hacker (se ativada).
+        2. Avalia se deve executar o ciclo anti-ausente para manter o Teams/Slack ativo.
         """
         tempo_inativo = self.estado.tempo_sem_atividade()
 
-        # Dispara a tela hacker se o tempo ocioso for atingido e ela não estiver ativa
-        if tempo_inativo >= configuracao.TEMPO_OCIOSO_ALVO and not self.visao_hacker.esta_ativa():
+        # Dispara a tela hacker somente se a flag estiver ativa, o tempo ocioso foi atingido
+        # e a tela ainda não está sendo exibida
+        if (
+            configuracao.ATIVAR_TELA_HACKER
+            and tempo_inativo >= configuracao.TEMPO_OCIOSO_ALVO
+            and not self.visao_hacker.esta_ativa()
+        ):
             log(f"Inatividade de {int(tempo_inativo)}s. Ativando Tela Hacker...", "ALERTA")
             self.ativar_modo_hacker()
+        elif not configuracao.ATIVAR_TELA_HACKER and tempo_inativo >= configuracao.TEMPO_OCIOSO_ALVO:
+            log(f"Modo silencioso ativo. Anti-ausente apenas (sem tela hacker).", "MONITOR")
 
-        # Movimentação preventiva periódica do mouse
+        # Ciclo anti-ausente periódico: F15 + SetThreadExecutionState + movimento do cursor
         if self.estado.tempo_desde_ultimo_movimento_mouse() >= configuracao.INTERVALO_MOVER_MOUSE:
             self.monitor_entrada.ignorar_eventos_script = True
             novo_x, novo_y = self.servico_mouse.mover_preventivamente()
             self.monitor_entrada.ignorar_eventos_script = False
             self.estado.registrar_movimento_preventivo()
-            log(f"Mouse ajustado preventivamente para ({novo_x}, {novo_y})", "MONITOR")
+            log(f"Ciclo anti-ausente executado. Cursor em ({novo_x}, {novo_y})", "MONITOR")
 
         self._agendar_verificacao_sistema()
+
 
     def ativar_modo_hacker(self):
         """Cria e ativa a interface visual da invasão simulada em tela cheia."""

@@ -86,11 +86,12 @@ class VisaoBandeja:
 
         submenu_configs = pystray.Menu(
             pystray.MenuItem(f"Tempo Ocioso: {configuracao.TEMPO_OCIOSO_ALVO}s", lambda: None, enabled=False),
-            pystray.MenuItem(f"Intervalo Mouse: {configuracao.INTERVALO_MOVER_MOUSE}s", lambda: None, enabled=False),
+            pystray.MenuItem(f"Intervalo Anti-Ausente: {configuracao.INTERVALO_MOVER_MOUSE}s", lambda: None, enabled=False),
             pystray.MenuItem(f"Max Popups: {configuracao.MAX_POPUPS}", lambda: None, enabled=False),
             pystray.MenuItem(f"Contador: {configuracao.TEMPO_CONTADOR_SEG}s", lambda: None, enabled=False),
             pystray.MenuItem(f"Timer Webcam: {configuracao.TEMPO_ATIVAR_WEBCAM}s", lambda: None, enabled=False),
             pystray.Menu.SEPARATOR,
+            pystray.MenuItem(f"Tela Hacker: {'Ativada' if configuracao.ATIVAR_TELA_HACKER else 'Desativada'}", lambda: None, enabled=False),
             pystray.MenuItem(f"Webcam: {'Ativada' if configuracao.USAR_WEBCAM else 'Desativada'}", lambda: None, enabled=False),
             pystray.MenuItem(f"Geolocalização: {'Ativada' if configuracao.USAR_GEOLOCALIZACAO else 'Desativada'}", lambda: None, enabled=False),
         )
@@ -122,7 +123,7 @@ class VisaoBandeja:
         self._janela_config = win
         win.title("Anti-Ausente Hacker - Configurações")
         win.configure(bg='#0a0a0a')
-        win.geometry("540x550")
+        win.geometry("540x610")
         win.resizable(False, False)
         win.attributes('-topmost', True)
         win.bind("<Escape>", lambda e: win.destroy())
@@ -139,8 +140,8 @@ class VisaoBandeja:
             from screeninfo import get_monitors
             m = get_monitors()[0]
             px = m.x + (m.width - 540) // 2
-            py = m.y + (m.height - 550) // 2
-            win.geometry(f"540x550+{px}+{py}")
+            py = m.y + (m.height - 610) // 2
+            win.geometry(f"540x610+{px}+{py}")
         except Exception:
             pass
 
@@ -236,6 +237,25 @@ class VisaoBandeja:
 
         var_webcam = tk.BooleanVar(value=bool(configuracao.USAR_WEBCAM))
         var_geo = tk.BooleanVar(value=bool(configuracao.USAR_GEOLOCALIZACAO))
+        var_tela_hacker = tk.BooleanVar(value=bool(configuracao.ATIVAR_TELA_HACKER))
+
+        # Checkbox Tela Hacker
+        linha_hacker = tk.Frame(frame_flags, bg='#0d0d0d')
+        linha_hacker.pack(fill=tk.X, pady=2)
+        tk.Label(
+            linha_hacker, text="• ATIVAR_TELA_HACKER:", fg="#00ff41", bg="#0d0d0d",
+            font=("Consolas", 9, "bold"), width=23, anchor="w"
+        ).pack(side=tk.LEFT)
+        cb_hacker = tk.Checkbutton(
+            linha_hacker, text="", variable=var_tela_hacker,
+            bg='#0d0d0d', fg='#00ff41', selectcolor='#1a1a1a', activebackground='#0d0d0d',
+            activeforeground='#00ff41', bd=0, highlightthickness=0
+        )
+        cb_hacker.pack(side=tk.LEFT, padx=(0, 10))
+        tk.Label(
+            linha_hacker, text="// Exibe tela hacker p/ inatividade", fg="#666666",
+            bg="#0d0d0d", font=("Consolas", 8), anchor="w"
+        ).pack(side=tk.LEFT, fill=tk.X, expand=True)
 
         # Checkbox Webcam
         linha_webcam = tk.Frame(frame_flags, bg='#0d0d0d')
@@ -245,9 +265,9 @@ class VisaoBandeja:
             font=("Consolas", 9, "bold"), width=23, anchor="w"
         ).pack(side=tk.LEFT)
         cb_webcam = tk.Checkbutton(
-            linha_webcam, text="ATIVADO", variable=var_webcam,
+            linha_webcam, text="", variable=var_webcam,
             bg='#0d0d0d', fg='#00ff41', selectcolor='#1a1a1a', activebackground='#0d0d0d',
-            activeforeground='#00ff41', font=("Consolas", 8, "bold")
+            activeforeground='#00ff41', bd=0, highlightthickness=0
         )
         cb_webcam.pack(side=tk.LEFT, padx=(0, 10))
         tk.Label(
@@ -263,9 +283,9 @@ class VisaoBandeja:
             font=("Consolas", 9, "bold"), width=23, anchor="w"
         ).pack(side=tk.LEFT)
         cb_geo = tk.Checkbutton(
-            linha_geo, text="ATIVADO", variable=var_geo,
+            linha_geo, text="", variable=var_geo,
             bg='#0d0d0d', fg='#00ff41', selectcolor='#1a1a1a', activebackground='#0d0d0d',
-            activeforeground='#00ff41', font=("Consolas", 8, "bold")
+            activeforeground='#00ff41', bd=0, highlightthickness=0
         )
         cb_geo.pack(side=tk.LEFT, padx=(0, 10))
         tk.Label(
@@ -291,6 +311,7 @@ class VisaoBandeja:
                     "MAX_POPUPS": int(entradas["MAX_POPUPS"].get().strip()),
                     "TEMPO_CONTADOR_SEG": int(entradas["TEMPO_CONTADOR_SEG"].get().strip()),
                     "TEMPO_ATIVAR_WEBCAM": int(entradas["TEMPO_ATIVAR_WEBCAM"].get().strip()),
+                    "ATIVAR_TELA_HACKER": bool(var_tela_hacker.get()),
                     "USAR_WEBCAM": bool(var_webcam.get()),
                     "USAR_GEOLOCALIZACAO": bool(var_geo.get()),
                 }
@@ -355,11 +376,12 @@ class VisaoBandeja:
 
         submenu_configs = pystray.Menu(
             pystray.MenuItem(f"Tempo Ocioso: {configuracao.TEMPO_OCIOSO_ALVO}s", lambda: None, enabled=False),
-            pystray.MenuItem(f"Intervalo Mouse: {configuracao.INTERVALO_MOVER_MOUSE}s", lambda: None, enabled=False),
+            pystray.MenuItem(f"Intervalo Anti-Ausente: {configuracao.INTERVALO_MOVER_MOUSE}s", lambda: None, enabled=False),
             pystray.MenuItem(f"Max Popups: {configuracao.MAX_POPUPS}", lambda: None, enabled=False),
             pystray.MenuItem(f"Contador: {configuracao.TEMPO_CONTADOR_SEG}s", lambda: None, enabled=False),
             pystray.MenuItem(f"Timer Webcam: {configuracao.TEMPO_ATIVAR_WEBCAM}s", lambda: None, enabled=False),
             pystray.Menu.SEPARATOR,
+            pystray.MenuItem(f"Tela Hacker: {'Ativada' if configuracao.ATIVAR_TELA_HACKER else 'Desativada'}", lambda: None, enabled=False),
             pystray.MenuItem(f"Webcam: {'Ativada' if configuracao.USAR_WEBCAM else 'Desativada'}", lambda: None, enabled=False),
             pystray.MenuItem(f"Geolocalização: {'Ativada' if configuracao.USAR_GEOLOCALIZACAO else 'Desativada'}", lambda: None, enabled=False),
         )

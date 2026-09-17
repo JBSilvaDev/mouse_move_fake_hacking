@@ -35,9 +35,9 @@ O programa combina produtividade e uma pegadinha inofensiva:
    - **`SetThreadExecutionState`** (API do kernel do Windows): Informa ao sistema operacional que o display e o processador devem permanecer ativos, prevenindo tela de bloqueio e suspensão impostas por políticas corporativas.
    - **Pulso neutro via tecla virtual `F15`**: Gera um evento real de teclado no subsistema do Windows, zerando o temporizador de inatividade `GetLastInputInfo` que o Microsoft Teams e o Slack consultam. A tecla `F15` não possui caractere, atalho ou função associada, sendo totalmente inofensiva.
    - **Micro-movimentos do cursor**: Desloca o ponteiro em pixels aleatórios para apresentar padrão de atividade variado.
-2. **Modo Invasão / Ransomware:** Caso o computador permaneça ocioso pelo tempo definido (sem toque humano no teclado ou mouse), o sistema cobre todos os monitores com uma simulação realista de invasão hacker.
+2. **Modo Invasão / Ransomware (Opcional):** Caso o computador permaneça ocioso pelo tempo definido (sem toque humano no teclado ou mouse), o sistema pode cobrir todos os monitores com uma simulação realista de invasão hacker. Essa tela pode ser desativada a qualquer momento nas configurações, permitindo operar em **modo 100% silencioso** (apenas anti-ausente).
 3. **ESC com Prioridade Máxima:** A tecla **`ESC`** é processada com prioridade absoluta e encerra o modo hacker imediatamente, em qualquer circunstância, mesmo durante a emissão de pulsos automáticos. Os botões **OK** dos pop-ups e o botão de revelação da pegadinha continuam funcionando normalmente.
-4. **Painel na Bandeja e Edição Dinâmica:** Ícone personalizado de caveirinha na bandeja do Windows que permite inspecionar o estado atual e abrir a janela de configurações para ajustes em tempo de execução.
+4. **Painel na Bandeja e Edição Dinâmica:** Ícone personalizado de caveirinha na bandeja do Windows que permite inspecionar o estado atual (inclusive se a tela hacker está ativada ou não) e abrir a janela de configurações para ajustes em tempo de execução.
 5. **Execução Silenciosa em Segundo Plano:** Utiliza `pythonw.exe` para rodar sem deixar janelas de terminal abertas.
 
 ---
@@ -101,6 +101,9 @@ As configurações podem ser alteradas de duas maneiras:
 
 1. **Pela Interface Gráfica (Recomendado):**
    - Clique com o botão direito no ícone da bandeja e selecione **"⚙️ Ver / Editar Configurações"**.
+   - Alterne a opção **"Ativar Tela Hacker (Simulação de Invasão)"**:
+     - **Marcado:** Dispara a simulação hacker completa quando o tempo ocioso for atingido.
+     - **Desmarcado (Modo Silencioso):** Não abre nenhuma tela ou som, executando apenas o anti-ausente (F15 + `SetThreadExecutionState` + micro-movimentos do mouse).
    - Altere os valores desejados e clique em **"💾 SALVAR CONFIGURAÇÕES"** (a janela será fechada e as opções aplicadas na hora).
 
 2. **Pelo arquivo `configuracao.py`:**
@@ -113,6 +116,7 @@ As configurações podem ser alteradas de duas maneiras:
    TEMPO_ATIVAR_WEBCAM = 15      # Segundos até ativar a simulação de webcam
 
    # ================= RECURSOS E FLAGS =================
+   ATIVAR_TELA_HACKER = True     # Se True dispara a tela hacker; se False roda apenas o anti-ausente silencioso (F15 + mouse)
    USAR_WEBCAM = False           # Ativa ou desativa a simulação de webcam
    USAR_GEOLOCALIZACAO = True    # Ativa ou desativa o mapa mundial de ataques
    ```
