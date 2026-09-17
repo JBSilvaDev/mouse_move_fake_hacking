@@ -204,7 +204,7 @@ class VisaoMapa:
         """
         canvas.create_text(
             x_offset, y_offset - 14,
-            text="◬ LIVE CYBER THREAT MAP",
+            text="◬ LIVE DATA EXFILTRATION MAP",
             fill="#00ff41",
             font=("Consolas", 8, "bold"),
             anchor="w",
@@ -212,7 +212,7 @@ class VisaoMapa:
         )
         self.item_threat = canvas.create_text(
             x_offset + self.largura, y_offset - 14,
-            text="THREAT: CRITICAL",
+            text="EXFIL: CRITICAL",
             fill="#ff0044",
             font=("Consolas", 8, "bold"),
             anchor="e",
@@ -233,7 +233,7 @@ class VisaoMapa:
         lat_alvo = dados_geo.get('lat', 0.0)
         lon_alvo = dados_geo.get('lon', 0.0)
 
-        info_alvo = f"TARGET: {cidade_alvo}, {pais_alvo} | IP: {ip_alvo} | GPS: {lat_alvo}, {lon_alvo}"
+        info_alvo = f"SOURCE: {cidade_alvo}, {pais_alvo} | IP: {ip_alvo} | GPS: {lat_alvo}, {lon_alvo}"
         canvas.create_text(
             x_offset, y_offset + self.altura + 8,
             text=info_alvo,
@@ -245,7 +245,7 @@ class VisaoMapa:
 
         self.item_feed = canvas.create_text(
             x_offset, y_offset + self.altura + 22,
-            text="FEED: [INTERCEPTANDO TRÁFEGO DE REDE...]",
+            text="FEED: [INICIANDO EXFILTRAÇÃO DE DADOS PARA SERVIDORES REMOTOS...]",
             fill="#00ff41",
             font=("Consolas", 7),
             anchor="w",
@@ -287,22 +287,30 @@ class VisaoMapa:
             cor_th = "#ff0044" if (self.frame_anim_mapa // 15) % 2 == 0 else "#ffcc00"
             canvas.itemconfig(self.item_threat, fill=cor_th)
 
-        # Spawna novos ataques periodicamente
+        # Spawna novas transmissões de exfiltração de dados (upload para o exterior)
         if self.frame_anim_mapa % random.randint(7, 14) == 0:
-            src = random.choice(NOS_ATAQUE_GLOBAIS)
-            slx, sly = self.lat_lon_para_xy(src['lat'], src['lon'], self.largura, self.altura)
-            x1 = x_offset + slx
-            y1 = y_offset + sly
+            # 85% dos fluxos partem diretamente do alvo local para servidores globais
+            origem_no_alvo = (random.random() < 0.85)
 
-            direcionado_ao_alvo = (random.random() < 0.75)
-            if direcionado_ao_alvo:
-                x2, y2 = alvo_x, alvo_y
-                dst_name = f"{alvo_cidade} [TARGET]"
+            if origem_no_alvo:
+                x1, y1 = alvo_x, alvo_y
+                src_name = f"{alvo_cidade} [LOCAL]"
+                dst = random.choice(NOS_ATAQUE_GLOBAIS)
+                dlx, dly = self.lat_lon_para_xy(dst['lat'], dst['lon'], self.largura, self.altura)
+                x2 = x_offset + dlx
+                y2 = y_offset + dly
+                dst_name = f"{dst['name']} [C2 SERVER]"
             else:
+                # 15% de saltos de rota entre servidores remotos da rede
+                src = random.choice(NOS_ATAQUE_GLOBAIS)
+                slx, sly = self.lat_lon_para_xy(src['lat'], src['lon'], self.largura, self.altura)
+                x1 = x_offset + slx
+                y1 = y_offset + sly
                 dst = random.choice([n for n in NOS_ATAQUE_GLOBAIS if n != src])
                 dlx, dly = self.lat_lon_para_xy(dst['lat'], dst['lon'], self.largura, self.altura)
                 x2 = x_offset + dlx
                 y2 = y_offset + dly
+                src_name = src['name']
                 dst_name = dst['name']
 
             tipo_info = random.choice(TIPOS_ATAQUE)
@@ -317,10 +325,10 @@ class VisaoMapa:
                 "t": 0.0,
                 "speed": random.uniform(0.018, 0.038),
                 "cor": tipo_info["cor"],
-                "tipo": tipo_info["tipo"],
-                "src_name": src["name"],
+                "tipo": "EXFILTRANDO" if origem_no_alvo else tipo_info["tipo"],
+                "src_name": src_name,
                 "dst_name": dst_name,
-                "is_target": direcionado_ao_alvo
+                "is_target": origem_no_alvo
             })
 
         canvas.delete("dinamico_mapa")
@@ -332,7 +340,7 @@ class VisaoMapa:
             ny = y_offset + nly
             canvas.create_oval(nx-2, ny-2, nx+2, ny+2, fill="#00ff41", outline="#003300", tags="dinamico_mapa")
 
-        # 2. Desenha o Alvo com radar pulsante
+        # 2. Desenha o Alvo com radar pulsante de transmissão / upload de dados
         for offset in (0, 7, 14):
             r = ((self.frame_anim_mapa + offset) % 22) + 2
             cor_onda = "#ff0044" if r < 14 else "#66001a"
@@ -341,7 +349,7 @@ class VisaoMapa:
         canvas.create_line(alvo_x - 7, alvo_y, alvo_x + 7, alvo_y, fill="white", width=1, tags="dinamico_mapa")
         canvas.create_line(alvo_x, alvo_y - 7, alvo_x, alvo_y + 7, fill="white", width=1, tags="dinamico_mapa")
         canvas.create_oval(alvo_x - 3, alvo_y - 3, alvo_x + 3, alvo_y + 3, fill="#ff0044", outline="white", tags="dinamico_mapa")
-        canvas.create_text(alvo_x + 8, alvo_y - 8, text="🎯 TARGET LOCKED", fill="#00ff41", font=("Consolas", 7, "bold"), anchor="w", tags="dinamico_mapa")
+        canvas.create_text(alvo_x + 8, alvo_y - 8, text="📤 EXFILTRANDO DADOS", fill="#00ff41", font=("Consolas", 7, "bold"), anchor="w", tags="dinamico_mapa")
 
         # 3. Desenha os projéteis e arcos balísticos
         ataques_restantes = []
