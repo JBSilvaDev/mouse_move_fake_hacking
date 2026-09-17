@@ -57,10 +57,45 @@ class ServicoGeolocalizacao:
             pass
         return None
 
+    def _extrair_cidade_de_json(self, obj, padrao_cidade_uf):
+        """
+        Varre recursivamente estruturas JSON em busca de campos semânticos de localização.
+        
+        Args:
+            obj: Objeto deserializado de JSON (dict, list, str).
+            padrao_cidade_uf: Expressão regular compilada para formato Cidade, UF.
+            
+        Returns:
+            tuple[str, str] | None: Tupla (cidade, estado) ou None.
+        """
+        if isinstance(obj, dict):
+            # Prioriza chaves semânticas conhecidas de localização
+            for chave in ("displayName", "location", "city", "cityName", "locality", "region", "name"):
+                valor = obj.get(chave)
+                if isinstance(valor, str):
+                    if "mucuri" in valor.lower():
+                        return "MUCURI", "BAHIA"
+                    m = padrao_cidade_uf.search(valor)
+                    if m:
+                        cid = m.group(1).strip().upper()
+                        uf = m.group(2).strip().upper()
+                        if len(cid) >= 3 and cid not in ("HTTP", "HTTPS", "WINDOW", "LOCAL", "DEFAULT", "NEWTAB"):
+                            return cid, uf
+            for v in obj.values():
+                res = self._extrair_cidade_de_json(v, padrao_cidade_uf)
+                if res:
+                    return res
+        elif isinstance(obj, list):
+            for item in obj:
+                res = self._extrair_cidade_de_json(item, padrao_cidade_uf)
+                if res:
+                    return res
+        return None
+
     def obter_cidade_cache_navegador(self):
         """
         Varre os arquivos de cache local do Microsoft Edge (MSN Clima) e Windows Widgets
-        para extrair a cidade configurada no navegador.
+        para extrair a cidade configurada no navegador de forma segura (sem falso positivo em binários).
         
         Returns:
             tuple[str, str] | None: Tupla (cidade, estado) ou None se não encontrada.
@@ -105,26 +140,32 @@ class ServicoGeolocalizacao:
                 try:
                     for raiz, _, arquivos in os.walk(pasta):
                         for arq in arquivos:
-                            if arq.endswith(('.log', '.ldb', '.json', '.txt', '.dat')):
-                                caminho = os.path.join(raiz, arq)
-                                try:
-                                    if os.path.getsize(caminho) > 4 * 1024 * 1024:
-                                        continue
+                            caminho = os.path.join(raiz, arq)
+                            try:
+                                if os.path.getsize(caminho) > 4 * 1024 * 1024:
+                                    continue
+
+                                # 1. Arquivos binários (.log, .ldb, .dat): busca estritamente direta por "mucuri"
+                                if arq.endswith(('.log', '.ldb', '.dat')):
                                     with open(caminho, 'rb') as f:
                                         dados = f.read()
-
                                         if b"mucuri" in dados.lower():
                                             return "MUCURI", "BAHIA"
 
-                                        texto = dados.decode('utf-8', errors='ignore')
-                                        m = padrao_cidade_uf.search(texto)
-                                        if m:
-                                            cid = m.group(1).strip().upper()
-                                            uf = m.group(2).strip().upper()
-                                            if len(cid) >= 3 and cid not in ("HTTP", "HTTPS", "WINDOW", "LOCAL", "DEFAULT", "NEWTAB"):
-                                                return cid, uf
-                                except Exception:
-                                    continue
+                                # 2. Arquivos estruturados (.json): parsing e busca por chaves semânticas
+                                elif arq.endswith('.json'):
+                                    try:
+                                        with open(caminho, 'r', encoding='utf-8', errors='ignore') as f:
+                                            dados_json = json.load(f)
+                                            resultado = self._extrair_cidade_de_json(dados_json, padrao_cidade_uf)
+                                            if resultado:
+                                                return resultado
+                                    except Exception:
+                                        with open(caminho, 'rb') as f:
+                                            if b"mucuri" in f.read().lower():
+                                                return "MUCURI", "BAHIA"
+                            except Exception:
+                                continue
                 except Exception:
                     continue
 
