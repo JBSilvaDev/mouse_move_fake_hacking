@@ -17,6 +17,7 @@ TEMPO_ATIVAR_WEBCAM = 15 # Segundos decorridos da invasão até ligar a webcam
 # ================= RECURSOS E FLAGS =================
 USAR_WEBCAM = True # Ativa ou desativa o streaming falso da webcam
 USAR_GEOLOCALIZACAO = True # Ativa ou desativa a geolocalização e o mapa mundial de ataques
+CIDADE_MANUAL = None # None = Detecção 100% automática via API de IP; ou string (ex: "São Paulo") se desejar fixar em rede corporativa
 ATIVAR_TELA_HACKER = True # Se True, exibe a tela hacker ao atingir o tempo ocioso; se False, apenas roda o anti-ausente silencioso
 
 # ================= IDENTIFICAÇÃO DO SISTEMA =================
