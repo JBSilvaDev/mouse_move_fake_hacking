@@ -43,13 +43,23 @@ class MonitorEntrada:
             self.ao_interagir()
 
     def _tratar_tecla(self, tecla):
-        """Trata eventos de teclas do teclado, verificando se foi a tecla ESC."""
+        """Trata eventos de teclas do teclado, garantindo que o ESC tenha prioridade máxima."""
+        # A tecla ESC NUNCA é ignorada sob nenhuma hipótese, garantindo a saída imediata da tela hacker
         if tecla == keyboard.Key.esc:
             if self.ao_pressionar_esc:
                 self.ao_pressionar_esc()
-        else:
-            if self.ao_interagir:
-                self.ao_interagir()
+            return
+
+        # Ignora eventos gerados pelo próprio script (ex: movimentação periódica)
+        if self.ignorar_eventos_script:
+            return
+
+        # Ignora especificamente a tecla virtual neutra F15 usada pelo anti-ausente
+        if tecla == keyboard.Key.f15 or getattr(tecla, 'vk', None) == 0x7E:
+            return
+
+        if self.ao_interagir:
+            self.ao_interagir()
 
     def iniciar(self):
         """Inicia as threads em segundo plano para escuta dos dispositivos de entrada."""

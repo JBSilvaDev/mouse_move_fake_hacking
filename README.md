@@ -1,6 +1,6 @@
 # Anti-Ausente Hacker (Mouse Move & Ransomware Prank) 🖱️💀⚠️
 
-Utilitário em Python que previne o status "Ausente" em aplicativos corporativos (como Microsoft Teams, Slack e Discord) através de micro-movimentos inteligentes do cursor, aliado a uma simulação visual de "Invasão Hacker / Ransomware" de alto impacto ativada por tempo de ociosidade, com gerenciamento completo via Bandeja do Sistema (System Tray).
+Utilitário em Python que previne o status "Ausente" em aplicativos corporativos (como Microsoft Teams, Slack e Discord) através de uma estratégia de anti-inatividade de **três camadas**, aliada a uma simulação visual de "Invasão Hacker / Ransomware" de alto impacto ativada por tempo de ociosidade, com gerenciamento completo via Bandeja do Sistema (System Tray).
 
 ---
 
@@ -31,9 +31,12 @@ Tela cheia em todos os monitores com terminal de comandos, mapa global de ameaç
 
 O programa combina produtividade e uma pegadinha inofensiva:
 
-1. **Anti-Ausente Inteligente:** Realiza micro-movimentos imperceptíveis no cursor no intervalo configurado. O script diferencia movimentos automatizados de interações humanas, garantindo que o status permaneça "Disponível" sem interferir no tempo de inatividade real.
+1. **Anti-Ausente com 3 Camadas:** A cada intervalo configurado, o sistema executa três ações complementares para manter o status online de forma garantida:
+   - **`SetThreadExecutionState`** (API do kernel do Windows): Informa ao sistema operacional que o display e o processador devem permanecer ativos, prevenindo tela de bloqueio e suspensão impostas por políticas corporativas.
+   - **Pulso neutro via tecla virtual `F15`**: Gera um evento real de teclado no subsistema do Windows, zerando o temporizador de inatividade `GetLastInputInfo` que o Microsoft Teams e o Slack consultam. A tecla `F15` não possui caractere, atalho ou função associada, sendo totalmente inofensiva.
+   - **Micro-movimentos do cursor**: Desloca o ponteiro em pixels aleatórios para apresentar padrão de atividade variado.
 2. **Modo Invasão / Ransomware:** Caso o computador permaneça ocioso pelo tempo definido (sem toque humano no teclado ou mouse), o sistema cobre todos os monitores com uma simulação realista de invasão hacker.
-3. **Desativação Exclusiva via ESC:** Durante a exibição da tela hacker, cliques comuns e outras teclas são ignorados. Somente ao pressionar a tecla **`ESC`** o modo hacker é cancelado e as janelas são fechadas.
+3. **ESC com Prioridade Máxima:** A tecla **`ESC`** é processada com prioridade absoluta e encerra o modo hacker imediatamente, em qualquer circunstância, mesmo durante a emissão de pulsos automáticos. Os botões **OK** dos pop-ups e o botão de revelação da pegadinha continuam funcionando normalmente.
 4. **Painel na Bandeja e Edição Dinâmica:** Ícone personalizado de caveirinha na bandeja do Windows que permite inspecionar o estado atual e abrir a janela de configurações para ajustes em tempo de execução.
 5. **Execução Silenciosa em Segundo Plano:** Utiliza `pythonw.exe` para rodar sem deixar janelas de terminal abertas.
 
@@ -104,7 +107,7 @@ As configurações podem ser alteradas de duas maneiras:
    ```python
    # ================= TEMPOS E LIMITES =================
    TEMPO_OCIOSO_ALVO = 120       # Segundos sem interação para disparar a tela hacker
-   INTERVALO_MOVER_MOUSE = 100   # Intervalo em segundos para mover o mouse
+   INTERVALO_MOVER_MOUSE = 100   # Intervalo em segundos para o ciclo anti-ausente (F15 + SetThreadExecutionState + movimento do cursor)
    MAX_POPUPS = 7                # Limite máximo de janelas de erro falsas
    TEMPO_CONTADOR_SEG = 180      # Duração da contagem regressiva em segundos
    TEMPO_ATIVAR_WEBCAM = 15      # Segundos até ativar a simulação de webcam

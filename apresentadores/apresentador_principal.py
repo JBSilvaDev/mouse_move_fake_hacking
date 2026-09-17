@@ -97,6 +97,9 @@ class ApresentadorPrincipal:
         # Inicia monitoramento de entrada
         self.monitor_entrada.iniciar()
 
+        # Configura estado de execução do Windows para manter display e sistema acordados
+        self.servico_mouse.manter_sistema_acordado()
+
         # Inicia ícone da bandeja
         self.visao_bandeja.iniciar()
 
@@ -388,6 +391,11 @@ class ApresentadorPrincipal:
 
         try:
             self.visao_bandeja.parar()
+        except Exception:
+            pass
+
+        try:
+            self.servico_mouse.liberar_sistema()
         except Exception:
             pass
 
