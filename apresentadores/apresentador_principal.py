@@ -79,7 +79,7 @@ class ApresentadorPrincipal:
         self.visao_mapa = VisaoMapa(MAPA_LARGURA, MAPA_ALTURA)
         self.visao_webcam = VisaoWebcam()
         self.visao_popups = VisaoPopups(self.root)
-        self.visao_bandeja = VisaoBandeja(ao_sair=self.encerrar_aplicacao)
+        self.visao_bandeja = VisaoBandeja(master_tk=self.root, ao_sair=self.encerrar_aplicacao)
 
         # --- IDENTIFICADORES DE LOOPS DO TKINTER ---
         self._loop_sistema_id = None
