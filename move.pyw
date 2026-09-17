@@ -21,7 +21,7 @@ from pynput import keyboard, mouse
 from screeninfo import get_monitors
 
 # ================= CONFIGURAÇÕES =================
-TEMPO_OCIOSO_ALVO = 5     # Segundos sem mexer para ativar a pegadinha
+TEMPO_OCIOSO_ALVO = 120     # Segundos sem mexer para ativar a pegadinha
 INTERVALO_MOVER_MOUSE = 100  # Intervalo para mover o mouse (Anti-Teams)
 MAX_POPUPS = 7              # Limite máximo de janelas de erro
 TEMPO_CONTADOR_SEG = 180    # 3 minutos de contagem regressiva
