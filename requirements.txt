@@ -14,3 +14,4 @@ pystray==0.19.5
 pytweening==1.2.0
 screeninfo==0.8.1
 typing_extensions==4.16.0
+winsdk
