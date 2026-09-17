@@ -97,16 +97,6 @@ class VisaoMapa:
             except Exception:
                 pass
 
-        # 1. Grade cibernética sutil
-        for x in range(0, w, 28):
-            draw.line([(x, 0), (x, h)], fill=(0, 25, 8, 140), width=1)
-        for y in range(0, h, 28):
-            draw.line([(0, y), (w, y)], fill=(0, 25, 8, 140), width=1)
-
-        eq_y = int(h * 0.52)
-        mer_x = int(w * 0.50)
-        draw.line([(0, eq_y), (w, eq_y)], fill=(0, 45, 15, 180), width=1)
-        draw.line([(mer_x, 0), (mer_x, h)], fill=(0, 45, 15, 180), width=1)
 
         desenhou_oficial = False
         if data_geo and "features" in data_geo:
