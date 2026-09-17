@@ -100,25 +100,27 @@ Pressione a tecla **`ESC`** para fechar a simulação e retornar instantaneament
 As configurações podem ser alteradas de duas maneiras:
 
 1. **Pela Interface Gráfica (Recomendado):**
-   - Clique com o botão direito no ícone da bandeja e selecione **"⚙️ Ver / Editar Configurações"**.
-   - Alterne a opção **"Ativar Tela Hacker (Simulação de Invasão)"**:
-     - **Marcado:** Dispara a simulação hacker completa quando o tempo ocioso for atingido.
-     - **Desmarcado (Modo Silencioso):** Não abre nenhuma tela ou som, executando apenas o anti-ausente (F15 + `SetThreadExecutionState` + micro-movimentos do mouse).
-   - Altere os valores desejados e clique em **"💾 SALVAR CONFIGURAÇÕES"** (a janela será fechada e as opções aplicadas na hora).
+   - Clique com o botão direito no ícone da caveirinha na bandeja e selecione **"⚙️ Ver / Editar Configurações"**.
+   - O painel é dividido hierarquicamente em duas seções com **reatividade dinâmica**:
+     - **`[ANTI-AUSENTE & SISTEMA]` (Sempre ativos):** Ajuste do `INTERVALO_MOVER_MOUSE` (frequência do ciclo anti-ausente) e do `TEMPO_OCIOSO_ALVO` (tempo sem interação para disparo).
+     - **`[SIMULAÇÃO TELA HACKER]` (Interruptor mestre):**
+       - **Marcado (`True`):** Habilita todos os recursos visuais da pegadinha hacker (contador regressivo, limite de popups falsos e mapa mundial de ameaças). O campo `TEMPO_ATIVAR_WEBCAM` fica condicionado ao checkbox `USAR_WEBCAM` (só habilita quando a webcam estiver marcada).
+       - **Desmarcado (`False` - Modo Silencioso):** Desabilita visualmente todas as opções da tela hacker, reseta os checkboxes secundários para `False` e executa apenas o anti-ausente corporativo (F15 + `SetThreadExecutionState` + micro-movimentos do cursor) sem nenhuma janela ou alerta sonoro.
+   - Altere os valores desejados e clique em **"💾 SALVAR CONFIGURAÇÕES"** (a janela fecha e aplica as mudanças instantaneamente).
 
 2. **Pelo arquivo `configuracao.py`:**
    ```python
    # ================= TEMPOS E LIMITES =================
-   TEMPO_OCIOSO_ALVO = 120       # Segundos sem interação para disparar a tela hacker
+   TEMPO_OCIOSO_ALVO = 120       # Tempo em segundos sem interação para disparar a tela hacker
    INTERVALO_MOVER_MOUSE = 100   # Intervalo em segundos para o ciclo anti-ausente (F15 + SetThreadExecutionState + movimento do cursor)
-   MAX_POPUPS = 7                # Limite máximo de janelas de erro falsas
-   TEMPO_CONTADOR_SEG = 180      # Duração da contagem regressiva em segundos
-   TEMPO_ATIVAR_WEBCAM = 15      # Segundos até ativar a simulação de webcam
+   MAX_POPUPS = 7                # Limite máximo simultâneo de janelas de erro falsas
+   TEMPO_CONTADOR_SEG = 180      # Duração da contagem regressiva em segundos (3 minutos)
+   TEMPO_ATIVAR_WEBCAM = 15      # Segundos decorridos da invasão até ligar a webcam
 
    # ================= RECURSOS E FLAGS =================
-   ATIVAR_TELA_HACKER = True     # Se True dispara a tela hacker; se False roda apenas o anti-ausente silencioso (F15 + mouse)
-   USAR_WEBCAM = False           # Ativa ou desativa a simulação de webcam
-   USAR_GEOLOCALIZACAO = True    # Ativa ou desativa o mapa mundial de ataques
+   ATIVAR_TELA_HACKER = False    # Se True, exibe a tela hacker; se False, roda apenas o anti-ausente silencioso
+   USAR_GEOLOCALIZACAO = False   # Ativa ou desativa a geolocalização e o mapa mundial de ataques
+   USAR_WEBCAM = False           # Ativa ou desativa o streaming falso da webcam
    ```
 
 ---

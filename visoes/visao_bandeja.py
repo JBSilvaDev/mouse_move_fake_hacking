@@ -175,35 +175,35 @@ class VisaoBandeja:
         # Divisor
         tk.Frame(conteudo, bg="#00ff41", height=1).pack(fill=tk.X, padx=16, pady=6)
 
-        # Seção: Tempos e Limites
-        frame_tempos = tk.Frame(conteudo, bg='#0d0d0d')
-        frame_tempos.pack(fill=tk.X, padx=16, pady=2)
+        entradas = {}
+        labels_dinamicos = {}
+
+        # =========================================================================
+        # SEÇÃO 1: ANTI-AUSENTE & SISTEMA (Sempre ativos)
+        # =========================================================================
+        frame_sistema = tk.Frame(conteudo, bg='#0d0d0d')
+        frame_sistema.pack(fill=tk.X, padx=16, pady=2)
 
         tk.Label(
-            frame_tempos,
-            text="[TEMPOS E LIMITES]",
+            frame_sistema,
+            text="[ANTI-AUSENTE & SISTEMA]",
             fg="#ffcc00",
             bg="#0d0d0d",
             font=("Consolas", 10, "bold")
         ).pack(anchor="w", pady=(0, 4))
 
-        entradas = {}
-
-        campos_tempos = [
-            ("TEMPO_OCIOSO_ALVO", str(configuracao.TEMPO_OCIOSO_ALVO), "Segundos p/ disparar invasão"),
-            ("INTERVALO_MOVER_MOUSE", str(configuracao.INTERVALO_MOVER_MOUSE), "Intervalo p/ mover mouse"),
-            ("MAX_POPUPS", str(configuracao.MAX_POPUPS), "Limite máximo de popups"),
-            ("TEMPO_CONTADOR_SEG", str(configuracao.TEMPO_CONTADOR_SEG), "Contagem regressiva (segundos)"),
-            ("TEMPO_ATIVAR_WEBCAM", str(configuracao.TEMPO_ATIVAR_WEBCAM), "Segundos p/ ligar webcam"),
+        campos_sistema = [
+            ("INTERVALO_MOVER_MOUSE", str(configuracao.INTERVALO_MOVER_MOUSE), "Intervalo anti-ausente (F15 + cursor)"),
+            ("TEMPO_OCIOSO_ALVO", str(configuracao.TEMPO_OCIOSO_ALVO), "Segundos ociosos p/ disparo"),
         ]
 
-        for chave, val_ini, desc in campos_tempos:
-            linha = tk.Frame(frame_tempos, bg='#0d0d0d')
+        for chave, val_ini, desc in campos_sistema:
+            linha = tk.Frame(frame_sistema, bg='#0d0d0d')
             linha.pack(fill=tk.X, pady=2)
 
             tk.Label(
                 linha, text=f"• {chave}:", fg="#00ff41", bg="#0d0d0d",
-                font=("Consolas", 9, "bold"), width=23, anchor="w"
+                font=("Consolas", 9, "bold"), width=24, anchor="w"
             ).pack(side=tk.LEFT)
 
             ent = tk.Entry(
@@ -223,75 +223,188 @@ class VisaoBandeja:
         # Divisor
         tk.Frame(conteudo, bg="#222222", height=1).pack(fill=tk.X, padx=16, pady=6)
 
-        # Seção: Recursos e Flags
-        frame_flags = tk.Frame(conteudo, bg='#0d0d0d')
-        frame_flags.pack(fill=tk.X, padx=16, pady=2)
+        # =========================================================================
+        # SEÇÃO 2: SIMULAÇÃO TELA HACKER (Controlada pelo interruptor mestre)
+        # =========================================================================
+        frame_hacker = tk.Frame(conteudo, bg='#0d0d0d')
+        frame_hacker.pack(fill=tk.X, padx=16, pady=2)
 
         tk.Label(
-            frame_flags,
-            text="[RECURSOS E FLAGS]",
+            frame_hacker,
+            text="[SIMULAÇÃO TELA HACKER]",
             fg="#ffcc00",
             bg="#0d0d0d",
             font=("Consolas", 10, "bold")
         ).pack(anchor="w", pady=(0, 4))
 
-        var_webcam = tk.BooleanVar(value=bool(configuracao.USAR_WEBCAM))
-        var_geo = tk.BooleanVar(value=bool(configuracao.USAR_GEOLOCALIZACAO))
         var_tela_hacker = tk.BooleanVar(value=bool(configuracao.ATIVAR_TELA_HACKER))
+        var_geo = tk.BooleanVar(value=bool(configuracao.USAR_GEOLOCALIZACAO))
+        var_webcam = tk.BooleanVar(value=bool(configuracao.USAR_WEBCAM))
 
-        # Checkbox Tela Hacker
-        linha_hacker = tk.Frame(frame_flags, bg='#0d0d0d')
-        linha_hacker.pack(fill=tk.X, pady=2)
+        # 1. Interruptor Mestre da Tela Hacker
+        linha_mestre = tk.Frame(frame_hacker, bg='#0d0d0d')
+        linha_mestre.pack(fill=tk.X, pady=2)
         tk.Label(
-            linha_hacker, text="• ATIVAR_TELA_HACKER:", fg="#00ff41", bg="#0d0d0d",
-            font=("Consolas", 9, "bold"), width=23, anchor="w"
+            linha_mestre, text="• ATIVAR_TELA_HACKER:", fg="#00ff41", bg="#0d0d0d",
+            font=("Consolas", 9, "bold"), width=24, anchor="w"
         ).pack(side=tk.LEFT)
         cb_hacker = tk.Checkbutton(
-            linha_hacker, text="", variable=var_tela_hacker,
+            linha_mestre, text="", variable=var_tela_hacker,
             bg='#0d0d0d', fg='#00ff41', selectcolor='#1a1a1a', activebackground='#0d0d0d',
             activeforeground='#00ff41', bd=0, highlightthickness=0
         )
         cb_hacker.pack(side=tk.LEFT, padx=(0, 10))
         tk.Label(
-            linha_hacker, text="// Exibe tela hacker p/ inatividade", fg="#666666",
-            bg="#0d0d0d", font=("Consolas", 8), anchor="w"
+            linha_mestre, text="// Ativa simulação visual de invasão", fg="#888888",
+            bg="#0d0d0d", font=("Consolas", 8, "italic"), anchor="w"
         ).pack(side=tk.LEFT, fill=tk.X, expand=True)
 
-        # Checkbox Webcam
-        linha_webcam = tk.Frame(frame_flags, bg='#0d0d0d')
-        linha_webcam.pack(fill=tk.X, pady=2)
-        tk.Label(
-            linha_webcam, text="• USAR_WEBCAM:", fg="#00ff41", bg="#0d0d0d",
-            font=("Consolas", 9, "bold"), width=23, anchor="w"
-        ).pack(side=tk.LEFT)
-        cb_webcam = tk.Checkbutton(
-            linha_webcam, text="", variable=var_webcam,
-            bg='#0d0d0d', fg='#00ff41', selectcolor='#1a1a1a', activebackground='#0d0d0d',
-            activeforeground='#00ff41', bd=0, highlightthickness=0
-        )
-        cb_webcam.pack(side=tk.LEFT, padx=(0, 10))
-        tk.Label(
-            linha_webcam, text="// Exibe streaming e timer da webcam", fg="#666666",
-            bg="#0d0d0d", font=("Consolas", 8), anchor="w"
-        ).pack(side=tk.LEFT, fill=tk.X, expand=True)
+        # 2. Parâmetros visuais gerais (Contador e Popups)
+        campos_hacker_nums = [
+            ("TEMPO_CONTADOR_SEG", str(configuracao.TEMPO_CONTADOR_SEG), "Contagem regressiva (segundos)"),
+            ("MAX_POPUPS", str(configuracao.MAX_POPUPS), "Limite máximo de popups falsos"),
+        ]
+        for chave, val_ini, desc in campos_hacker_nums:
+            linha = tk.Frame(frame_hacker, bg='#0d0d0d')
+            linha.pack(fill=tk.X, pady=2)
 
-        # Checkbox Geolocalização
-        linha_geo = tk.Frame(frame_flags, bg='#0d0d0d')
+            lbl_chave = tk.Label(
+                linha, text=f"• {chave}:", fg="#00ff41", bg="#0d0d0d",
+                font=("Consolas", 9, "bold"), width=24, anchor="w"
+            )
+            lbl_chave.pack(side=tk.LEFT)
+
+            ent = tk.Entry(
+                linha, bg='#1a1a1a', fg='#ffffff', insertbackground='#00ff41',
+                font=("Consolas", 9, "bold"), width=7, justify="center", bd=1, relief="solid",
+                highlightcolor="#00ff41", highlightthickness=1
+            )
+            ent.insert(0, val_ini)
+            ent.pack(side=tk.LEFT, padx=(0, 10))
+            entradas[chave] = ent
+
+            lbl_desc = tk.Label(
+                linha, text=f"// {desc}", fg="#666666", bg="#0d0d0d",
+                font=("Consolas", 8), anchor="w"
+            )
+            lbl_desc.pack(side=tk.LEFT, fill=tk.X, expand=True)
+
+            labels_dinamicos[chave] = (lbl_chave, lbl_desc)
+
+        # 3. Checkbox Geolocalização
+        linha_geo = tk.Frame(frame_hacker, bg='#0d0d0d')
         linha_geo.pack(fill=tk.X, pady=2)
-        tk.Label(
+        lbl_geo_chave = tk.Label(
             linha_geo, text="• USAR_GEOLOCALIZACAO:", fg="#00ff41", bg="#0d0d0d",
-            font=("Consolas", 9, "bold"), width=23, anchor="w"
-        ).pack(side=tk.LEFT)
+            font=("Consolas", 9, "bold"), width=24, anchor="w"
+        )
+        lbl_geo_chave.pack(side=tk.LEFT)
         cb_geo = tk.Checkbutton(
             linha_geo, text="", variable=var_geo,
             bg='#0d0d0d', fg='#00ff41', selectcolor='#1a1a1a', activebackground='#0d0d0d',
             activeforeground='#00ff41', bd=0, highlightthickness=0
         )
         cb_geo.pack(side=tk.LEFT, padx=(0, 10))
-        tk.Label(
-            linha_geo, text="// Exibe mapa mundi de exfiltração", fg="#666666",
+        lbl_geo_desc = tk.Label(
+            linha_geo, text="// Exibe mapa mundi de ameaças", fg="#666666",
             bg="#0d0d0d", font=("Consolas", 8), anchor="w"
-        ).pack(side=tk.LEFT, fill=tk.X, expand=True)
+        )
+        lbl_geo_desc.pack(side=tk.LEFT, fill=tk.X, expand=True)
+
+        # 4. Checkbox Webcam
+        linha_webcam = tk.Frame(frame_hacker, bg='#0d0d0d')
+        linha_webcam.pack(fill=tk.X, pady=2)
+        lbl_webcam_chave = tk.Label(
+            linha_webcam, text="• USAR_WEBCAM:", fg="#00ff41", bg="#0d0d0d",
+            font=("Consolas", 9, "bold"), width=24, anchor="w"
+        )
+        lbl_webcam_chave.pack(side=tk.LEFT)
+        cb_webcam = tk.Checkbutton(
+            linha_webcam, text="", variable=var_webcam,
+            bg='#0d0d0d', fg='#00ff41', selectcolor='#1a1a1a', activebackground='#0d0d0d',
+            activeforeground='#00ff41', bd=0, highlightthickness=0
+        )
+        cb_webcam.pack(side=tk.LEFT, padx=(0, 10))
+        lbl_webcam_desc = tk.Label(
+            linha_webcam, text="// Ativa simulação de webcam", fg="#666666",
+            bg="#0d0d0d", font=("Consolas", 8), anchor="w"
+        )
+        lbl_webcam_desc.pack(side=tk.LEFT, fill=tk.X, expand=True)
+
+        # 5. Sub-opção: Tempo para Ativar Webcam (Indentada visualmente sob USAR_WEBCAM)
+        linha_tempo_cam = tk.Frame(frame_hacker, bg='#0d0d0d')
+        linha_tempo_cam.pack(fill=tk.X, pady=(2, 4))
+        lbl_cam_tempo_chave = tk.Label(
+            linha_tempo_cam, text="  ↳ TEMPO_ATIVAR_WEBCAM:", fg="#00ff41", bg="#0d0d0d",
+            font=("Consolas", 9, "bold"), width=24, anchor="w"
+        )
+        lbl_cam_tempo_chave.pack(side=tk.LEFT)
+
+        ent_cam_tempo = tk.Entry(
+            linha_tempo_cam, bg='#1a1a1a', fg='#ffffff', insertbackground='#00ff41',
+            font=("Consolas", 9, "bold"), width=7, justify="center", bd=1, relief="solid",
+            highlightcolor="#00ff41", highlightthickness=1
+        )
+        ent_cam_tempo.insert(0, str(configuracao.TEMPO_ATIVAR_WEBCAM))
+        ent_cam_tempo.pack(side=tk.LEFT, padx=(0, 10))
+        entradas["TEMPO_ATIVAR_WEBCAM"] = ent_cam_tempo
+
+        lbl_cam_tempo_desc = tk.Label(
+            linha_tempo_cam, text="// Segundos de invasão p/ ligar webcam", fg="#666666",
+            bg="#0d0d0d", font=("Consolas", 8), anchor="w"
+        )
+        lbl_cam_tempo_desc.pack(side=tk.LEFT, fill=tk.X, expand=True)
+
+        # =========================================================================
+        # REATIVIDADE DINÂMICA ENTRE AS OPÇÕES
+        # =========================================================================
+        def atualizar_estado_hacker():
+            """Habilita ou desabilita as opções secundárias com base no estado da tela hacker e da webcam."""
+            hacker_ativo = bool(var_tela_hacker.get())
+            estado_hacker = 'normal' if hacker_ativo else 'disabled'
+            estado_cb = 'normal' if hacker_ativo else 'disabled'
+
+            if not hacker_ativo:
+                var_webcam.set(False)
+                var_geo.set(False)
+
+            # Opções numéricas que dependem da tela hacker
+            for chave in ["TEMPO_CONTADOR_SEG", "MAX_POPUPS"]:
+                if chave in entradas:
+                    entradas[chave].config(
+                        state=estado_hacker,
+                        disabledbackground='#111111',
+                        disabledforeground='#444444'
+                    )
+                if chave in labels_dinamicos:
+                    lbl_ch, lbl_ds = labels_dinamicos[chave]
+                    lbl_ch.config(fg="#00ff41" if hacker_ativo else "#444444")
+                    lbl_ds.config(fg="#666666" if hacker_ativo else "#333333")
+
+            # Checkboxes de flags da tela hacker
+            cb_geo.config(state=estado_cb)
+            lbl_geo_chave.config(fg="#00ff41" if hacker_ativo else "#444444")
+            lbl_geo_desc.config(fg="#666666" if hacker_ativo else "#333333")
+
+            cb_webcam.config(state=estado_cb)
+            lbl_webcam_chave.config(fg="#00ff41" if hacker_ativo else "#444444")
+            lbl_webcam_desc.config(fg="#666666" if hacker_ativo else "#333333")
+
+            # O tempo da webcam depende de AMBOS: tela hacker ativa E webcam marcada
+            webcam_ativa = hacker_ativo and bool(var_webcam.get())
+            estado_tempo_cam = 'normal' if webcam_ativa else 'disabled'
+
+            ent_cam_tempo.config(
+                state=estado_tempo_cam,
+                disabledbackground='#111111',
+                disabledforeground='#444444'
+            )
+            lbl_cam_tempo_chave.config(fg="#00ff41" if webcam_ativa else "#444444")
+            lbl_cam_tempo_desc.config(fg="#666666" if webcam_ativa else "#333333")
+
+        cb_hacker.config(command=atualizar_estado_hacker)
+        cb_webcam.config(command=atualizar_estado_hacker)
+        atualizar_estado_hacker()
 
         # Divisor
         tk.Frame(conteudo, bg="#222222", height=1).pack(fill=tk.X, padx=16, pady=6)
